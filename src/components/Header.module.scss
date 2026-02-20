@@ -129,35 +129,6 @@
   gap: $space-3;
 }
 
-.themeBtn {
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: $radius-full;
-  transition: background $transition-fast;
-  position: relative;
-  overflow: hidden;
-  font-size: 18px;
-  color: var(--text-muted);
-
-  &:hover {
-    background: var(--accent-subtle);
-    color: var(--text-primary);
-  }
-}
-
-.themeSun {
-  [data-theme="dark"] & { display: inline; }
-  [data-theme="light"] & { display: none; }
-}
-
-.themeMoon {
-  [data-theme="dark"] & { display: none; }
-  [data-theme="light"] & { display: inline; }
-}
-
 .burger {
   display: none;
   flex-direction: column;

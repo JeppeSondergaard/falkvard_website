@@ -282,8 +282,7 @@
 
 // ===== FAQ =====
 .faqSection {
-  @include section-padding;
-  background: var(--bg-secondary);
+  @include section-bg(right bottom);
 }
 
 .faqHeading {

@@ -39,7 +39,9 @@ function ChatPanel() {
     const container = containerRef.current;
     if (!container || elementRef.current) return;
 
-    const el = document.createElement("openai-chatkit");
+    const el = document.createElement("openai-chatkit") as HTMLElement & {
+      setOptions?: (opts: Record<string, unknown>) => void;
+    };
     elementRef.current = el;
     el.style.width = "100%";
     el.style.height = "100%";
@@ -53,6 +55,17 @@ function ChatPanel() {
       }
       (el as unknown as Record<string, CallableFunction>).setOptions({
         api: { getClientSecret },
+        async onClientTool({ name, params }: { name: string; params: Record<string, unknown> }) {
+          if (name === "create_booking") {
+            const res = await fetch("/api/agent/booking", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(params),
+            });
+            return res.json();
+          }
+          throw new Error(`Unknown tool: ${name}`);
+        },
         theme: {
           colorScheme: "dark" as const,
           color: {
@@ -66,7 +79,7 @@ function ChatPanel() {
         },
         locale: "da-DK",
         history: { enabled: false },
-        header: { enabled: false },
+        header: { title: "Få inspiration til din næste tattoo" },
         startScreen: {
           greeting: "Hej! Jeg er Falkvard Tattoo's booking assistent. Hvad kan jeg hjælpe dig med?",
           prompts: [
@@ -125,7 +138,7 @@ export default function ChatWidget() {
       <button
         className={`${s.fab} ${open ? s.fabOpen : ""}`}
         onClick={() => setOpen(!open)}
-        aria-label={open ? "Luk chat" : "Få hjælp til at finde på en tatovering"}
+        aria-label={open ? "Luk chat" : "Mangler du inspiration til din næste tattoo?"}
       >
         {open ? (
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -137,7 +150,7 @@ export default function ChatWidget() {
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
             </svg>
-            <span className={s.fabLabel}>Få hjælp til at finde på en tatovering</span>
+            <span className={s.fabLabel}>Mangler du inspiration til din næste tattoo?</span>
           </>
         )}
       </button>

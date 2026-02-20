@@ -35,9 +35,7 @@
 
 // Hero
 .hero {
-  @include section-padding;
-  background: var(--bg-secondary);
-  text-align: center;
+  @include hero-bg;
 }
 
 .heroInner {
@@ -66,8 +64,7 @@
 }
 
 .sectionAlt {
-  @include section-padding;
-  background: var(--bg-secondary);
+  @include section-bg(right center);
 }
 
 .sectionTitle {
@@ -89,13 +86,30 @@
 
 .styleCard {
   @include card-base;
-  padding: $space-5;
+  overflow: hidden;
   @include card-hover;
+
+  &:hover .styleCardImage {
+    transform: scale(1.05);
+  }
 }
 
-.styleCardAccent {
-  @include card-accent;
-  padding: $space-5;
+.styleCardImageWrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: var(--bg-surface);
+}
+
+.styleCardImage {
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  filter: grayscale(0.3) brightness(0.85);
+}
+
+.styleCardContent {
+  padding: $space-4 $space-5 $space-5;
 }
 
 .styleCardTitle {

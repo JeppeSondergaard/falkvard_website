@@ -4,12 +4,11 @@
 // Pure greyscale palette. No warm tones, no gold.
 // Dark theme = default (matches Instagram B&W vibe)
 
-:root,
-[data-theme="dark"] {
+:root {
   --bg-primary: #0A0A0A;
   --bg-secondary: #141414;
-  --bg-elevated: #1E1E1E;
-  --bg-surface: #262626;
+  --bg-elevated: rgba(255, 255, 255, 0.03);
+  --bg-surface: rgba(255, 255, 255, 0.05);
 
   --text-primary: #FFFFFF;
   --text-secondary: #A0A0A0;
@@ -20,8 +19,8 @@
   --accent-subtle: rgba(204, 204, 204, 0.08);
   --accent-border: rgba(204, 204, 204, 0.20);
 
-  --border: #2A2A2A;
-  --border-subtle: #1E1E1E;
+  --border: rgba(255, 255, 255, 0.10);
+  --border-subtle: rgba(255, 255, 255, 0.06);
 
   --ornamental: #888888;
   --ornamental-subtle: rgba(136, 136, 136, 0.12);
@@ -31,32 +30,4 @@
   --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.6);
 
   --overlay: rgba(0, 0, 0, 0.7);
-}
-
-[data-theme="light"] {
-  --bg-primary: #F5F5F5;
-  --bg-secondary: #EBEBEB;
-  --bg-elevated: #FFFFFF;
-  --bg-surface: #F0F0F0;
-
-  --text-primary: #0A0A0A;
-  --text-secondary: #555555;
-  --text-muted: #888888;
-
-  --accent: #333333;
-  --accent-hover: #000000;
-  --accent-subtle: rgba(51, 51, 51, 0.06);
-  --accent-border: rgba(51, 51, 51, 0.15);
-
-  --border: #D0D0D0;
-  --border-subtle: #E0E0E0;
-
-  --ornamental: #999999;
-  --ornamental-subtle: rgba(153, 153, 153, 0.10);
-
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.10);
-
-  --overlay: rgba(245, 245, 245, 0.8);
 }

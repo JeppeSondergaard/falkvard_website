@@ -19,12 +19,6 @@ export default function Header() {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const toggleTheme = () => {
-    const html = document.documentElement;
-    const current = html.getAttribute("data-theme");
-    html.setAttribute("data-theme", current === "light" ? "dark" : "light");
-  };
-
   return (
     <header className={s.header}>
       <div className={s.inner}>
@@ -54,15 +48,6 @@ export default function Header() {
         </nav>
 
         <div className={s.actions}>
-          <button
-            className={s.themeBtn}
-            onClick={toggleTheme}
-            aria-label="Skift tema"
-          >
-            <span className={s.themeSun}>&#9788;</span>
-            <span className={s.themeMoon}>&#9789;</span>
-          </button>
-
           <button
             className={`${s.burger} ${menuOpen ? s.burgerOpen : ""}`}
             onClick={() => setMenuOpen(!menuOpen)}

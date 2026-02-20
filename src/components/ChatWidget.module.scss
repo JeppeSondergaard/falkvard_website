@@ -36,6 +36,7 @@
 .fabLabel {
   @include body;
   font-size: $type-sm;
+  font-weight: 700;
   color: var(--bg-primary);
   white-space: nowrap;
 

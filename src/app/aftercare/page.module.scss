@@ -4,9 +4,7 @@
 
 // ===== HERO =====
 .hero {
-  @include section-padding;
-  background: var(--bg-secondary);
-  text-align: center;
+  @include hero-bg;
 }
 
 .heroInner {
@@ -36,8 +34,7 @@
 }
 
 .sectionAlt {
-  @include section-padding;
-  background: var(--bg-secondary);
+  @include section-bg(center bottom);
 }
 
 .sectionInner {

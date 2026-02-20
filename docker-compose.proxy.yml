@@ -1,0 +1,8 @@
+services:
+  afalkvard:
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    external: true

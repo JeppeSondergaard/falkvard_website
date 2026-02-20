@@ -171,8 +171,7 @@
 
 // ===== INTRO =====
 .intro {
-  @include section-padding;
-  background: var(--bg-secondary);
+  @include section-bg(center top);
 }
 
 .introInner {
@@ -241,8 +240,7 @@
 
 // ===== SERVICES PREVIEW =====
 .services {
-  @include section-padding;
-  background: var(--bg-secondary);
+  @include section-bg(center bottom);
 }
 
 .servicesInner {
@@ -333,8 +331,7 @@
 
 // ===== PROCESS =====
 .process {
-  @include section-padding;
-  background: var(--bg-secondary);
+  @include section-bg(left center);
 }
 
 .processInner {
