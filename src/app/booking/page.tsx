@@ -93,7 +93,7 @@ export default function BookingPage() {
               Vi har modtaget din booking-forespørgsel og vender tilbage
               hurtigst muligt. Tjek din email for en bekræftelse.
             </p>
-            <Link href="/" className={s.ctaBtn}>
+            <Link href="/home" className={s.ctaBtn}>
               Tilbage til forsiden
             </Link>
           </div>

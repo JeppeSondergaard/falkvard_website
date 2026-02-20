@@ -7,7 +7,7 @@ import TentIcon from "./TentIcon";
 import s from "./Header.module.scss";
 
 const NAV_ITEMS = [
-  { href: "/", label: "Hjem" },
+  { href: "/home", label: "Hjem" },
   { href: "/about", label: "Om" },
   { href: "/services", label: "Services" },
   { href: "/gallery", label: "Galleri" },
@@ -28,7 +28,7 @@ export default function Header() {
   return (
     <header className={s.header}>
       <div className={s.inner}>
-        <Link href="/" className={s.logoLink}>
+        <Link href="/home" className={s.logoLink}>
           <TentIcon size={28} variant="white" />
           <span className={s.logoText}>Falkvard Tattoo</span>
         </Link>

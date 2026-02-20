@@ -9,19 +9,20 @@ const MIME_TYPES: Record<string, string> = {
   png: "image/png",
   webp: "image/webp",
   gif: "image/gif",
+  svg: "image/svg+xml",
 };
 
 type Params = { params: Promise<{ path: string[] }> };
 
 export async function GET(_req: NextRequest, { params }: Params) {
   const segments = (await params).path;
-  const filename = segments[segments.length - 1];
 
-  if (!filename || filename.includes("..")) {
+  if (segments.some((s) => s.includes(".."))) {
     return NextResponse.json({ error: "Invalid path" }, { status: 400 });
   }
 
-  const filePath = path.join(UPLOADS_DIR, filename);
+  const filePath = path.join(UPLOADS_DIR, ...segments);
+  const filename = segments[segments.length - 1];
   if (!fs.existsSync(filePath)) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }

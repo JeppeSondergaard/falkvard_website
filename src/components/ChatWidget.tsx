@@ -47,11 +47,11 @@ function ChatPanel() {
     container.appendChild(el);
 
     const apply = () => {
-      if (typeof el.setOptions !== "function") {
+      if (typeof (el as unknown as Record<string, unknown>).setOptions !== "function") {
         setTimeout(apply, 200);
         return;
       }
-      el.setOptions({
+      (el as unknown as Record<string, CallableFunction>).setOptions({
         api: { getClientSecret },
         theme: {
           colorScheme: "dark" as const,

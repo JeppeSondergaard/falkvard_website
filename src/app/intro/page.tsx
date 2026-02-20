@@ -32,7 +32,7 @@ export default function IntroPage() {
   const handleEnter = useCallback(() => {
     timersRef.current.forEach(clearTimeout)
     setFadeDark(true)
-    setTimeout(() => router.push('/'), 800)
+    setTimeout(() => router.push('/home'), 800)
   }, [router])
 
   useEffect(() => {

@@ -4,23 +4,23 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
-import styles from './world/world.module.scss'
+import styles from './world.module.scss'
 
-const ForestScene = dynamic(() => import('./world/ForestScene'), {
+const ForestScene = dynamic(() => import('./ForestScene'), {
   ssr: false,
   loading: () => null,
 })
 
-export default function LandingPage() {
+export default function WorldPage() {
   const router = useRouter()
   const [phase, setPhase] = useState(0)
   const [fadeDark, setFadeDark] = useState(true)
   const [exploring, setExploring] = useState(false)
   const timersRef = useRef<ReturnType<typeof setTimeout>[]>([])
 
-  const handleContinue = useCallback(() => {
+  const handleExit = useCallback(() => {
     setFadeDark(true)
-    setTimeout(() => router.push('/home'), 2200)
+    setTimeout(() => router.push('/home'), 800)
   }, [router])
 
   const handleInteract = useCallback(() => {
@@ -29,7 +29,7 @@ export default function LandingPage() {
 
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      setPhase(5)
+      setPhase(4)
       setFadeDark(false)
       return
     }
@@ -39,7 +39,7 @@ export default function LandingPage() {
     t.push(setTimeout(() => setPhase(1), 1000))
     t.push(setTimeout(() => setPhase(2), 2800))
     t.push(setTimeout(() => setPhase(3), 4800))
-    t.push(setTimeout(() => setPhase(5), 6000))
+    t.push(setTimeout(() => setPhase(4), 7000))
     timersRef.current = t
     return () => t.forEach(clearTimeout)
   }, [])
@@ -56,6 +56,8 @@ export default function LandingPage() {
     return () => window.removeEventListener('keydown', onKey)
   }, [exploring])
 
+  const showOverlay = !exploring
+
   return (
     <div className={styles.worldContainer}>
       <div className={styles.sceneBg}>
@@ -66,7 +68,7 @@ export default function LandingPage() {
       <div className={`${styles.fadeOverlay} ${fadeDark ? styles.fadeDarkActive : ''}`} />
 
       <AnimatePresence>
-        {phase < 5 && (
+        {showOverlay && (
           <motion.div
             className={styles.overlay}
             initial={{ opacity: 1 }}
@@ -104,14 +106,14 @@ export default function LandingPage() {
       </AnimatePresence>
 
       <motion.button
-        className={styles.continueButton}
+        className={styles.exitButton}
         initial={{ opacity: 0 }}
-        animate={{ opacity: fadeDark ? 0 : 1 }}
-        transition={{ duration: 1.2, delay: 0.5 }}
-        onClick={handleContinue}
-        aria-label="Fortsæt til hjemmesiden"
+        animate={{ opacity: phase >= 4 ? 1 : 0 }}
+        transition={{ duration: 0.8 }}
+        onClick={handleExit}
+        aria-label="Exit to main site"
       >
-        Fortsæt &rarr;
+        &larr; Exit
       </motion.button>
 
       <AnimatePresence>
