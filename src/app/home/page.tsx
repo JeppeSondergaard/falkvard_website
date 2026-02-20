@@ -20,6 +20,9 @@ export default function Home() {
       <section className={s.hero}>
         <HeroVideo className={s.heroVideo} />
         <div className={s.heroOverlay} />
+        <Link href="/" className={s.worldBtn}>
+          <span style={{ fontSize: '1.2em' }}>←</span> Tilbage til intro
+        </Link>
         <div className={s.heroWatermark}>
           <TentIcon size={400} variant="white" />
         </div>

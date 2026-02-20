@@ -6,7 +6,12 @@ services:
     restart: unless-stopped
     expose:
       - "3000"
+    volumes:
+      - falkvard-data:/app/data
     env_file:
       - .env.production
     environment:
       - NODE_ENV=production
+
+volumes:
+  falkvard-data:

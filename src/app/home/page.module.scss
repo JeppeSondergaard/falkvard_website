@@ -41,6 +41,37 @@
   background: var(--bg-primary);
 }
 
+.worldBtn {
+  position: absolute;
+  top: $space-6;
+  left: $space-4;
+  z-index: 4;
+  text-decoration: none;
+  font-size: $type-xs;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #fff;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: opacity $transition-base;
+
+  &:hover {
+    opacity: 0.6;
+  }
+
+  @include above($bp-lg) {
+    left: $space-6;
+  }
+
+  @include below($bp-sm) {
+    top: $space-4;
+    font-size: 10px;
+  }
+}
+
 .heroVideo {
   position: absolute;
   inset: 0;
@@ -65,7 +96,7 @@
 
 .heroWatermark {
   position: absolute;
-  opacity: 0.05;
+  opacity: 0.1;
   pointer-events: none;
   z-index: 2;
 }

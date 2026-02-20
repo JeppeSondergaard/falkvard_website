@@ -48,3 +48,9 @@ next-env.d.ts
 *.mkv
 *.webm
 *.wmv
+
+# SQLite database and uploads (runtime data, never commit)
+/data/
+
+# Database dumps (use scripts/db-export.sh, commit deliberately if needed)
+scripts/*.sql

@@ -9,12 +9,50 @@ export const UPLOADS_DIR = path.join(process.cwd(), "data", "uploads");
 
 let _db: Database.Database | null = null;
 
+function isDbHealthy(filePath: string): boolean {
+  if (!fs.existsSync(filePath)) return true; // will be created fresh
+  try {
+    const db = new Database(filePath, { readonly: true });
+    db.pragma("integrity_check");
+    db.close();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function removeCorruptedFiles(filePath: string) {
+  const timestamp = Date.now();
+  for (const suffix of ["", "-wal", "-shm"]) {
+    const f = filePath + suffix;
+    if (!fs.existsSync(f)) continue;
+    try {
+      fs.renameSync(f, `${f}.corrupt.${timestamp}`);
+    } catch {
+      try { fs.unlinkSync(f); } catch { /* best effort */ }
+    }
+  }
+}
+
 export function getDb(): Database.Database {
-  if (_db) return _db;
+  if (_db) {
+    try {
+      _db.prepare("SELECT 1").get();
+      return _db;
+    } catch {
+      try { _db.close(); } catch { /* ignore */ }
+      _db = null;
+    }
+  }
 
   const dir = path.dirname(DB_PATH);
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
   if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+
+  if (!isDbHealthy(DB_PATH)) {
+    console.warn(`[db] Corrupt database detected at ${DB_PATH}, moving aside and recreating`);
+    removeCorruptedFiles(DB_PATH);
+  }
 
   _db = new Database(DB_PATH);
   _db.pragma("journal_mode = WAL");
@@ -22,6 +60,13 @@ export function getDb(): Database.Database {
 
   migrate(_db);
   return _db;
+}
+
+export function closeDb() {
+  if (_db) {
+    try { _db.close(); } catch { /* ignore */ }
+    _db = null;
+  }
 }
 
 function migrate(db: Database.Database) {

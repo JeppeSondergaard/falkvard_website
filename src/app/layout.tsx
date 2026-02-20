@@ -27,7 +27,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="da">
-      <body>
+      <body suppressHydrationWarning>
         <Header />
         <main>{children}</main>
         <Footer />
