@@ -1,26 +1,27 @@
 import Link from "next/link";
+import Image from "next/image";
 import s from "./page.module.scss";
 
 const STYLES = [
   {
     name: "Nordisk",
     desc: "Vikingeinspirerede mønstre, runer og keltiske knuder",
-    accent: false,
+    image: "/styles/style-nordisk.jpg",
   },
   {
     name: "Ornamental",
     desc: "Geometriske og symmetriske designs med fine detaljer",
-    accent: true,
+    image: "/styles/style-ornamental.jpg",
   },
   {
     name: "Dark Art",
     desc: "Mørke, atmosfæriske motiver med dybde og stemning",
-    accent: false,
+    image: "/styles/style-darkart.jpg",
   },
   {
     name: "Blomster",
     desc: "Botaniske designs fra fine linjer til bold realism",
-    accent: true,
+    image: "/styles/style-blomster.jpg",
   },
 ];
 
@@ -68,12 +69,20 @@ export default function ServicesPage() {
           <h2 className={s.sectionTitle}>Stilarter</h2>
           <div className={s.stylesGrid}>
             {STYLES.map((style) => (
-              <div
-                key={style.name}
-                className={style.accent ? s.styleCardAccent : s.styleCard}
-              >
-                <h3 className={s.styleCardTitle}>{style.name}</h3>
-                <p className={s.styleCardText}>{style.desc}</p>
+              <div key={style.name} className={s.styleCard}>
+                <div className={s.styleCardImageWrap}>
+                  <Image
+                    src={style.image}
+                    alt={`${style.name} tatoveringsstil`}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                    className={s.styleCardImage}
+                  />
+                </div>
+                <div className={s.styleCardContent}>
+                  <h3 className={s.styleCardTitle}>{style.name}</h3>
+                  <p className={s.styleCardText}>{style.desc}</p>
+                </div>
               </div>
             ))}
           </div>

@@ -63,11 +63,6 @@
     width: auto;
     filter: invert(1);
     mix-blend-mode: screen;
-
-    [data-theme='light'] & {
-      filter: none;
-      mix-blend-mode: multiply;
-    }
   }
 
   @include m.below($bp-sm) {

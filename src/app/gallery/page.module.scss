@@ -4,9 +4,7 @@
 
 // ===== HERO =====
 .hero {
-  @include section-padding;
-  background: var(--bg-primary);
-  text-align: center;
+  @include hero-bg;
 }
 
 .heroInner {
@@ -73,8 +71,7 @@
 
 // ===== MASONRY GRID =====
 .gallerySection {
-  @include section-padding;
-  background: var(--bg-secondary);
+  @include section-bg(center);
 }
 
 .galleryInner {

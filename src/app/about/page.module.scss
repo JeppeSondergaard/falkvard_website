@@ -4,9 +4,7 @@
 
 // ===== HERO =====
 .hero {
-  @include section-padding;
-  background: var(--bg-secondary);
-  text-align: center;
+  @include hero-bg;
 }
 
 .heroInner {
@@ -83,8 +81,7 @@
 
 // ===== PHILOSOPHY =====
 .philosophy {
-  @include section-padding;
-  background: var(--bg-secondary);
+  @include section-bg(right top);
 }
 
 .philosophyInner {
@@ -192,8 +189,7 @@
 
 // ===== CTA =====
 .cta {
-  @include section-padding;
-  background: var(--bg-secondary);
+  @include section-bg(left bottom);
   text-align: center;
 }
 

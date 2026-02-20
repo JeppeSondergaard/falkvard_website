@@ -1,47 +1,22 @@
-"use client";
-
-import { useState } from "react";
 import Image from "next/image";
 import s from "./styleguide.module.scss";
 import TentIcon from "@/components/TentIcon";
 
-const colors = {
-  dark: [
-    { name: "bg-primary", value: "#0A0A0A", var: "--bg-primary" },
-    { name: "bg-secondary", value: "#141414", var: "--bg-secondary" },
-    { name: "bg-elevated", value: "#1E1E1E", var: "--bg-elevated" },
-    { name: "bg-surface", value: "#262626", var: "--bg-surface" },
-    { name: "text-primary", value: "#FFFFFF", var: "--text-primary" },
-    { name: "text-secondary", value: "#A0A0A0", var: "--text-secondary" },
-    { name: "text-muted", value: "#666666", var: "--text-muted" },
-    { name: "accent", value: "#CCCCCC", var: "--accent" },
-    { name: "accent-hover", value: "#FFFFFF", var: "--accent-hover" },
-    { name: "border", value: "#2A2A2A", var: "--border" },
-    { name: "ornamental", value: "#888888", var: "--ornamental" },
-  ],
-  light: [
-    { name: "bg-primary", value: "#F5F5F5", var: "--bg-primary" },
-    { name: "bg-secondary", value: "#EBEBEB", var: "--bg-secondary" },
-    { name: "bg-elevated", value: "#FFFFFF", var: "--bg-elevated" },
-    { name: "bg-surface", value: "#F0F0F0", var: "--bg-surface" },
-    { name: "text-primary", value: "#0A0A0A", var: "--text-primary" },
-    { name: "text-secondary", value: "#555555", var: "--text-secondary" },
-    { name: "text-muted", value: "#888888", var: "--text-muted" },
-    { name: "accent", value: "#333333", var: "--accent" },
-    { name: "accent-hover", value: "#000000", var: "--accent-hover" },
-    { name: "border", value: "#D0D0D0", var: "--border" },
-    { name: "ornamental", value: "#999999", var: "--ornamental" },
-  ],
-};
+const colors = [
+  { name: "bg-primary", value: "#0A0A0A", var: "--bg-primary" },
+  { name: "bg-secondary", value: "#141414", var: "--bg-secondary" },
+  { name: "bg-elevated", value: "#1E1E1E", var: "--bg-elevated" },
+  { name: "bg-surface", value: "#262626", var: "--bg-surface" },
+  { name: "text-primary", value: "#FFFFFF", var: "--text-primary" },
+  { name: "text-secondary", value: "#A0A0A0", var: "--text-secondary" },
+  { name: "text-muted", value: "#666666", var: "--text-muted" },
+  { name: "accent", value: "#CCCCCC", var: "--accent" },
+  { name: "accent-hover", value: "#FFFFFF", var: "--accent-hover" },
+  { name: "border", value: "#2A2A2A", var: "--border" },
+  { name: "ornamental", value: "#888888", var: "--ornamental" },
+];
 
 export default function StyleguidePage() {
-  const [theme, setTheme] = useState<"dark" | "light">("dark");
-
-  const toggleTheme = (t: "dark" | "light") => {
-    setTheme(t);
-    document.documentElement.setAttribute("data-theme", t);
-  };
-
   return (
     <div className={s.page}>
       {/* Header */}
@@ -50,20 +25,6 @@ export default function StyleguidePage() {
           <div className={s.logo}>
             <TentIcon size={24} variant="white" />
             Falkvard Tattoo
-          </div>
-          <div className={s.themeToggle}>
-            <button
-              className={theme === "dark" ? s.active : ""}
-              onClick={() => toggleTheme("dark")}
-            >
-              Dark
-            </button>
-            <button
-              className={theme === "light" ? s.active : ""}
-              onClick={() => toggleTheme("light")}
-            >
-              Light
-            </button>
           </div>
         </div>
       </header>
@@ -178,29 +139,8 @@ export default function StyleguidePage() {
           Pure greyscale. No warm tones, no gold. Dark theme is default.
         </p>
 
-        <h3 className={s.sectionLabel} style={{ marginBottom: 16 }}>
-          Dark Theme
-        </h3>
         <div className={s.colorGrid}>
-          {colors.dark.map((c) => (
-            <div key={c.name} className={s.colorSwatch}>
-              <div className={s.swatchColor} style={{ background: c.value }} />
-              <div className={s.swatchInfo}>
-                <div className={s.swatchName}>{c.name}</div>
-                <div className={s.swatchValue}>{c.value}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <h3
-          className={s.sectionLabel}
-          style={{ marginTop: 48, marginBottom: 16 }}
-        >
-          Light Theme
-        </h3>
-        <div className={s.colorGrid}>
-          {colors.light.map((c) => (
+          {colors.map((c) => (
             <div key={c.name} className={s.colorSwatch}>
               <div className={s.swatchColor} style={{ background: c.value }} />
               <div className={s.swatchInfo}>
@@ -585,33 +525,6 @@ export default function StyleguidePage() {
         </div>
       </section>
 
-      {/* ========== 11. THEME TOGGLE DEMO ========== */}
-      <section className={s.section}>
-        <p className={s.sectionLabel}>12 — Theme</p>
-        <h2 className={s.sectionTitle}>Dark & Light Side by Side</h2>
-
-        <div className={s.themeCompare}>
-          <div className={`${s.themePanel} ${s.themePanelDark}`}>
-            <p className={s.themePanelLabel}>Dark Theme</p>
-            <h3 className={s.themePanelTitle}>Falkvard Tattoo</h3>
-            <p className={s.themePanelBody}>
-              Privat tatovør og piercer i trygge rammer. Nordisk, Ornamental,
-              Dark Art, blomster.
-            </p>
-            <button className={s.themePanelBtn}>Book en tid</button>
-          </div>
-
-          <div className={`${s.themePanel} ${s.themePanelLight}`}>
-            <p className={s.themePanelLabelLight}>Light Theme</p>
-            <h3 className={s.themePanelTitleLight}>Falkvard Tattoo</h3>
-            <p className={s.themePanelBodyLight}>
-              Privat tatovør og piercer i trygge rammer. Nordisk, Ornamental,
-              Dark Art, blomster.
-            </p>
-            <button className={s.themePanelBtnLight}>Book en tid</button>
-          </div>
-        </div>
-      </section>
     </div>
   );
 }

@@ -21,10 +21,9 @@ export default function ContactPage() {
           <div className={s.infoGrid}>
             <div className={s.infoCard}>
               <h3 className={s.infoTitle}>Adresse</h3>
-              <p className={s.infoText}>Privat studie i Svendborg</p>
-              <p className={s.infoNote}>
-                Adresse oplyses ved bekræftet booking
-              </p>
+              <p className={s.infoText}>Ramsherred 1</p>
+              <p className={s.infoText}>5700 Svendborg</p>
+              <p className={s.infoNote}>Privat studie — kun efter aftale</p>
             </div>
             <div className={s.infoCard}>
               <h3 className={s.infoTitle}>Kontakt</h3>
@@ -53,11 +52,17 @@ export default function ContactPage() {
         </div>
       </section>
 
-      {/* Map placeholder */}
+      {/* Map */}
       <section className={s.mapSection}>
         <div className={s.mapInner}>
-          <div className={s.mapPlaceholder}>
-            <p className={s.mapText}>Svendborg, Fyn</p>
+          <div className={s.mapContainer}>
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2272.5!2d10.6077!3d55.0597!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x464d31e8a5b7c0c7%3A0x0!2sRamsherred%201%2C%205700%20Svendborg!5e0!3m2!1sda!2sdk!4v1"
+              className={s.mapIframe}
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              title="Falkvard Tattoo — Ramsherred 1, Svendborg"
+            />
           </div>
         </div>
       </section>

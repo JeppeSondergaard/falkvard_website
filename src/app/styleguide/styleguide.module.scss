@@ -426,7 +426,7 @@
 }
 
 .cardDark {
-  background: var(--bg-secondary);
+  background: rgba(255, 255, 255, 0.02);
   border: 1px solid var(--border);
   border-radius: $radius-md;
   padding: $space-5;
