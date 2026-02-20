@@ -41,14 +41,38 @@
   background: var(--bg-primary);
 }
 
+.heroVideo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+
+.heroOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    to bottom,
+    rgba(var(--bg-primary-rgb, 10, 10, 10), 0.45) 0%,
+    rgba(var(--bg-primary-rgb, 10, 10, 10), 0.65) 50%,
+    rgba(var(--bg-primary-rgb, 10, 10, 10), 0.85) 100%
+  );
+  pointer-events: none;
+}
+
 .heroWatermark {
   position: absolute;
-  opacity: 0.03;
+  opacity: 0.05;
   pointer-events: none;
+  z-index: 2;
 }
 
 .heroContent {
   position: relative;
+  z-index: 3;
   text-align: center;
   padding: $space-6 $space-4;
   max-width: 720px;
@@ -122,6 +146,7 @@
   bottom: $space-6;
   left: 50%;
   transform: translateX(-50%);
+  z-index: 3;
   display: flex;
   flex-direction: column;
   align-items: center;

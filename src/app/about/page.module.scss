@@ -2,16 +2,10 @@
 @use '@/styles/mixins' as *;
 @use '@/styles/typography' as *;
 
-// Shared
-.sectionLabel {
-  @include section-label;
-  margin-bottom: $space-2;
-}
-
 // ===== HERO =====
 .hero {
   @include section-padding;
-  background: var(--bg-primary);
+  background: var(--bg-secondary);
   text-align: center;
 }
 
@@ -23,7 +17,7 @@
 .heroHeading {
   @include heading;
   font-size: $type-4xl;
-  margin-bottom: $space-4;
+  margin-bottom: $space-3;
 
   @include below($bp-md) {
     font-size: $type-3xl;
@@ -39,67 +33,72 @@
 // ===== ARTIST STORY =====
 .artistStory {
   @include section-padding;
-  background: var(--bg-secondary);
 }
 
 .artistStoryInner {
   @include container;
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: $space-8;
+  grid-template-columns: 320px 1fr;
+  gap: $space-7;
   align-items: center;
 
   @include below($bp-md) {
     grid-template-columns: 1fr;
-    gap: $space-6;
+    gap: $space-5;
+    text-align: center;
   }
 }
 
 .artistImagePlaceholder {
-  aspect-ratio: 3 / 4;
-  background: var(--bg-surface);
-  border: 1px solid var(--border);
+  width: 320px;
+  height: 320px;
   border-radius: $radius-md;
+  overflow: hidden;
+  border: 1px solid var(--border);
+
+  @include below($bp-md) {
+    width: 240px;
+    height: 240px;
+    margin: 0 auto;
+  }
 }
 
 .artistStoryContent {
   display: flex;
   flex-direction: column;
-  gap: $space-4;
+  gap: $space-3;
 }
 
 .artistStoryHeading {
   @include heading;
   font-size: $type-2xl;
-  margin-bottom: $space-2;
-
-  @include below($bp-md) {
-    font-size: $type-xl;
-  }
 }
 
 .artistStoryText {
   @include body;
   font-size: $type-md;
   color: var(--text-secondary);
+  max-width: 560px;
 }
 
 // ===== PHILOSOPHY =====
 .philosophy {
   @include section-padding;
-  background: var(--bg-primary);
+  background: var(--bg-secondary);
 }
 
 .philosophyInner {
   @include container;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $space-7;
 }
 
 .quoteBlock {
   @include ornamental-frame;
-  max-width: $max-width-narrow;
-  margin: 0 auto $space-8;
   text-align: center;
-  padding: $space-6;
+  max-width: $max-width-narrow;
 }
 
 .quoteText {
@@ -116,6 +115,8 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: $space-5;
+  width: 100%;
+  max-width: $max-width-content;
 
   @include below($bp-md) {
     grid-template-columns: 1fr;
@@ -123,15 +124,16 @@
 }
 
 .valueItem {
-  display: flex;
-  flex-direction: column;
-  gap: $space-2;
+  @include card-base;
+  padding: $space-5;
+  text-align: center;
+  @include card-hover;
 }
 
 .valueTitle {
   @include heading;
   font-size: $type-lg;
-  color: var(--accent);
+  margin-bottom: $space-2;
 }
 
 .valueDesc {
@@ -143,47 +145,43 @@
 // ===== PRIVATE STUDIO =====
 .privateStudio {
   @include section-padding;
-  background: var(--bg-primary);
 }
 
 .privateStudioInner {
   @include container;
+  max-width: $max-width-narrow;
 }
 
 .privateStudioHeading {
   @include heading;
   font-size: $type-2xl;
   margin-bottom: $space-6;
-  color: var(--text-primary);
-
-  @include below($bp-md) {
-    font-size: $type-xl;
-  }
 }
 
 .benefitsList {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: $space-5 $space-8;
-
-  @include below($bp-md) {
-    grid-template-columns: 1fr;
-  }
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: $space-4;
 }
 
 .benefitItem {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: $space-4;
 }
 
 .benefitNum {
   @include heading;
-  font-size: $type-4xl;
+  font-size: $type-3xl;
   color: var(--accent);
-  opacity: 0.6;
+  opacity: 0.5;
   line-height: 1;
   flex-shrink: 0;
+  width: 48px;
+  text-align: center;
 }
 
 .benefitText {
@@ -195,7 +193,7 @@
 // ===== CTA =====
 .cta {
   @include section-padding;
-  background: var(--bg-primary);
+  background: var(--bg-secondary);
   text-align: center;
 }
 

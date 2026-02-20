@@ -1,146 +1,78 @@
-"use client";
-
-import { useState } from "react";
+import Link from "next/link";
 import s from "./page.module.scss";
 
-const EMNE_OPTIONS = [
-  { value: "tatovering", label: "Tatovering" },
-  { value: "piercing", label: "Piercing" },
-  { value: "konsultation", label: "Konsultation" },
-  { value: "andet", label: "Andet" },
-] as const;
-
 export default function ContactPage() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [emne, setEmne] = useState("");
-  const [besked, setBesked] = useState("");
-
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    // TODO: send to API or email
-  }
-
   return (
     <>
       {/* Hero */}
       <section className={s.hero}>
         <div className={s.heroInner}>
           <h1 className={s.heroHeading}>Kontakt</h1>
-          <p className={s.heroIntro}>Vi vil gerne høre fra dig</p>
+          <p className={s.heroIntro}>
+            Har du spørgsmål eller vil du booke en tid? Du er altid velkommen
+            til at skrive.
+          </p>
         </div>
       </section>
 
-      {/* Two-column: Form + Info cards */}
-      <section className={s.contactSection}>
-        <div className={s.contactInner}>
-          <form className={s.form} onSubmit={handleSubmit}>
-            <div>
-              <label className={s.label} htmlFor="navn">
-                Navn
-              </label>
-              <input
-                id="navn"
-                type="text"
-                className={s.input}
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-              />
-            </div>
-            <div>
-              <label className={s.label} htmlFor="email">
-                Email
-              </label>
-              <input
-                id="email"
-                type="email"
-                className={s.input}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-            <div>
-              <label className={s.label} htmlFor="telefon">
-                Telefon
-              </label>
-              <input
-                id="telefon"
-                type="tel"
-                className={s.input}
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-              />
-            </div>
-            <div>
-              <label className={s.label} htmlFor="emne">
-                Emne
-              </label>
-              <select
-                id="emne"
-                className={s.select}
-                value={emne}
-                onChange={(e) => setEmne(e.target.value)}
-                required
-              >
-                <option value="">Vælg emne</option>
-                {EMNE_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className={s.label} htmlFor="besked">
-                Besked
-              </label>
-              <textarea
-                id="besked"
-                className={s.textarea}
-                value={besked}
-                onChange={(e) => setBesked(e.target.value)}
-                required
-              />
-            </div>
-            <button type="submit" className={s.submitBtn}>
-              Send besked
-            </button>
-          </form>
-
-          <div className={s.infoCards}>
-            <div className={s.addressCard}>
-              <span className={s.cardLabel}>Adresse</span>
-              <p className={s.cardContent}>
-                Ramsherred 1, 5700 Svendborg
+      {/* Contact Info */}
+      <section className={s.info}>
+        <div className={s.infoInner}>
+          <div className={s.infoGrid}>
+            <div className={s.infoCard}>
+              <h3 className={s.infoTitle}>Adresse</h3>
+              <p className={s.infoText}>Privat studie i Svendborg</p>
+              <p className={s.infoNote}>
+                Adresse oplyses ved bekræftet booking
               </p>
             </div>
-            <div className={s.hoursCard}>
-              <span className={s.cardLabel}>Åbningstider</span>
-              <p className={s.cardContent}>Åbent efter aftale</p>
-              <p className={s.cardSub}>Skriv eller ring for at booke</p>
+            <div className={s.infoCard}>
+              <h3 className={s.infoTitle}>Kontakt</h3>
+              <p className={s.infoText}>
+                <a
+                  href="https://www.instagram.com/a_falkvard_tattoo/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={s.infoLink}
+                >
+                  @a_falkvard_tattoo
+                </a>
+              </p>
+              <p className={s.infoNote}>
+                Instagram er den hurtigste måde at nå mig
+              </p>
             </div>
-            <div className={s.socialCard}>
-              <span className={s.cardLabel}>Social</span>
-              <a
-                href="https://instagram.com/a_falkvard_tattoo"
-                target="_blank"
-                rel="noopener noreferrer"
-                className={s.socialLink}
-              >
-                @a_falkvard_tattoo
-              </a>
+            <div className={s.infoCard}>
+              <h3 className={s.infoTitle}>Åbningstider</h3>
+              <p className={s.infoText}>Kun efter aftale</p>
+              <p className={s.infoNote}>
+                Book din tid, så finder vi et tidspunkt der passer
+              </p>
             </div>
           </div>
         </div>
       </section>
 
       {/* Map placeholder */}
-      <section className={s.mapSection} aria-hidden>
-        <div className={s.mapPlaceholder}>
-          <span className={s.mapPlaceholderText}>Kort kommer snart</span>
+      <section className={s.mapSection}>
+        <div className={s.mapInner}>
+          <div className={s.mapPlaceholder}>
+            <p className={s.mapText}>Svendborg, Fyn</p>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className={s.cta}>
+        <div className={s.ctaInner}>
+          <h2 className={s.ctaHeading}>Klar til at booke?</h2>
+          <p className={s.ctaText}>
+            Udfyld vores booking-formular, så vender jeg tilbage hurtigst
+            muligt.
+          </p>
+          <Link href="/booking" className={s.ctaBtn}>
+            Book en tid
+          </Link>
         </div>
       </section>
     </>

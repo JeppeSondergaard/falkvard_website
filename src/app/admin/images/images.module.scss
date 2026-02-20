@@ -1,0 +1,471 @@
+@use '@/styles/variables' as *;
+@use '@/styles/mixins' as *;
+@use '@/styles/typography' as *;
+
+// Layout
+.section {
+  min-height: 100vh;
+  background: var(--bg-primary);
+}
+
+.layout {
+  display: flex;
+  min-height: calc(100vh - 56px);
+}
+
+.loading {
+  @include body;
+  text-align: center;
+  padding: $space-9 0;
+  color: var(--text-muted);
+}
+
+// Sidebar
+.sidebar {
+  width: 240px;
+  flex-shrink: 0;
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border);
+  padding: $space-4 0;
+
+  @include below($bp-md) {
+    width: 56px;
+    padding: $space-3 0;
+  }
+}
+
+.sidebarTitle {
+  @include section-label;
+  padding: 0 $space-4;
+  margin-bottom: $space-3;
+
+  @include below($bp-md) {
+    @include sr-only;
+  }
+}
+
+.folderList {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.folderItem {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+  width: 100%;
+  padding: $space-2 $space-4;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all $transition-fast;
+  text-align: left;
+
+  &:hover {
+    background: var(--accent-subtle);
+  }
+
+  &.active {
+    background: var(--bg-elevated);
+    border-left: 2px solid var(--accent);
+    padding-left: calc(#{$space-4} - 2px);
+  }
+
+  @include below($bp-md) {
+    padding: $space-2;
+    justify-content: center;
+  }
+}
+
+.folderIcon {
+  font-size: $type-base;
+  width: 24px;
+  text-align: center;
+  flex-shrink: 0;
+  color: var(--text-muted);
+
+  .active & {
+    color: var(--text-primary);
+  }
+}
+
+.folderLabel {
+  @include body;
+  font-size: $type-sm;
+  color: var(--text-secondary);
+  flex: 1;
+
+  .active & {
+    color: var(--text-primary);
+  }
+
+  @include below($bp-md) {
+    @include sr-only;
+  }
+}
+
+.folderCount {
+  @include body;
+  font-size: $type-xs;
+  color: var(--text-muted);
+  background: var(--bg-surface);
+  padding: 1px 8px;
+  border-radius: $radius-full;
+  min-width: 24px;
+  text-align: center;
+
+  @include below($bp-md) {
+    @include sr-only;
+  }
+}
+
+// Main content
+.main {
+  flex: 1;
+  padding: $space-4;
+  overflow-y: auto;
+
+  @include above($bp-lg) {
+    padding: $space-5 $space-6;
+  }
+}
+
+// Toolbar
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $space-4;
+  gap: $space-3;
+  flex-wrap: wrap;
+}
+
+.toolbarLeft {
+  display: flex;
+  align-items: baseline;
+  gap: $space-3;
+}
+
+.pageTitle {
+  @include heading;
+  font-size: $type-2xl;
+}
+
+.imageCount {
+  @include body;
+  font-size: $type-sm;
+  color: var(--text-muted);
+}
+
+.uploadBtn {
+  @include heading;
+  font-size: $type-xs;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: $space-2 $space-5;
+  background: var(--accent);
+  color: var(--bg-primary);
+  border: none;
+  cursor: pointer;
+  transition: all $transition-fast;
+
+  &:hover:not(:disabled) {
+    background: var(--accent-hover);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.fileInput {
+  @include sr-only;
+}
+
+// Drop zone
+.dropZone {
+  border: 2px dashed var(--border);
+  border-radius: $radius-md;
+  padding: $space-5 $space-4;
+  margin-bottom: $space-5;
+  text-align: center;
+  transition: all $transition-base;
+
+  &.dragOver {
+    border-color: var(--accent);
+    background: var(--accent-subtle);
+  }
+}
+
+.dropZoneContent {
+  @include body;
+  font-size: $type-sm;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $space-2;
+
+  .dragOver & {
+    color: var(--text-primary);
+  }
+}
+
+.dropIcon {
+  font-size: $type-lg;
+}
+
+// Empty state
+.empty {
+  text-align: center;
+  padding: $space-8 $space-4;
+
+  p {
+    @include body;
+    color: var(--text-muted);
+  }
+}
+
+.emptyHint {
+  font-size: $type-sm;
+  margin-top: $space-2;
+}
+
+// Image grid
+.imageGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: $space-3;
+
+  @include above($bp-lg) {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+}
+
+// Image card
+.imageCard {
+  @include card-base;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+
+  &.dragging {
+    box-shadow: var(--shadow-lg);
+    border-color: var(--accent);
+  }
+}
+
+.dragHandle {
+  position: absolute;
+  top: $space-2;
+  left: $space-2;
+  z-index: 2;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: $radius-sm;
+  cursor: grab;
+  opacity: 0;
+  transition: opacity $transition-fast;
+  touch-action: none;
+
+  .imageCard:hover & {
+    opacity: 1;
+  }
+
+  &:active {
+    cursor: grabbing;
+  }
+}
+
+.dragIcon {
+  color: #fff;
+  font-size: $type-base;
+  line-height: 1;
+}
+
+.imageThumb {
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;
+  background: var(--bg-surface);
+}
+
+.thumbImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.disabledOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  @include heading;
+  font-size: $type-xs;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.imageInfo {
+  padding: $space-2;
+  display: flex;
+  flex-direction: column;
+  gap: $space-1;
+}
+
+.imageName {
+  @include body;
+  font-size: $type-xs;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.imageActions {
+  display: flex;
+  gap: $space-1;
+  align-items: center;
+}
+
+.toggleBtn {
+  @include body;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 2px 8px;
+  border-radius: $radius-full;
+  border: 1px solid;
+  cursor: pointer;
+  transition: all $transition-fast;
+
+  &.enabled {
+    background: rgba(0, 200, 100, 0.12);
+    border-color: rgba(0, 200, 100, 0.3);
+    color: #0c6;
+  }
+
+  &.disabled {
+    background: rgba(255, 200, 0, 0.12);
+    border-color: rgba(255, 200, 0, 0.3);
+    color: #cc0;
+  }
+}
+
+.moveBtn {
+  @include body;
+  font-size: $type-sm;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: $radius-sm;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all $transition-fast;
+  margin-left: auto;
+
+  &:hover {
+    border-color: var(--accent-border);
+    color: var(--text-primary);
+  }
+}
+
+.deleteBtn {
+  @include body;
+  font-size: $type-sm;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: $radius-sm;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all $transition-fast;
+
+  &:hover {
+    border-color: rgba(238, 85, 85, 0.5);
+    color: #e55;
+    background: rgba(238, 85, 85, 0.08);
+  }
+}
+
+.confirmDeleteBtn {
+  @include heading;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 2px 8px;
+  background: rgba(238, 85, 85, 0.15);
+  border: 1px solid #e55;
+  border-radius: $radius-sm;
+  color: #e55;
+  cursor: pointer;
+  transition: all $transition-fast;
+
+  &:hover {
+    background: #e55;
+    color: #fff;
+  }
+}
+
+// Move menu
+.moveMenu {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  background: var(--bg-elevated);
+  border-top: 1px solid var(--border);
+  padding: $space-1 0;
+  max-height: 200px;
+  overflow-y: auto;
+  box-shadow: var(--shadow-md);
+}
+
+.moveMenuItem {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+  width: 100%;
+  padding: $space-2 $space-3;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  @include body;
+  font-size: $type-sm;
+  color: var(--text-secondary);
+  text-align: left;
+  transition: all $transition-fast;
+
+  &:hover {
+    background: var(--accent-subtle);
+    color: var(--text-primary);
+  }
+}
+
+.moveMenuIcon {
+  width: 20px;
+  text-align: center;
+  font-size: $type-sm;
+  color: var(--text-muted);
+}

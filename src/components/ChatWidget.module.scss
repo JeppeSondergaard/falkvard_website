@@ -1,0 +1,97 @@
+@use '@/styles/variables' as *;
+@use '@/styles/mixins' as *;
+@use '@/styles/typography' as *;
+
+.fab {
+  position: fixed;
+  bottom: $space-5;
+  right: $space-5;
+  z-index: $z-chat;
+  height: 56px;
+  border-radius: $radius-full;
+  background: var(--accent);
+  color: var(--bg-primary);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $space-2;
+  padding: 0 $space-5 0 $space-4;
+  box-shadow: var(--shadow-lg);
+  transition: background $transition-fast, transform $transition-fast, padding $transition-fast;
+
+  &:hover {
+    background: var(--accent-hover);
+    transform: scale(1.02);
+  }
+
+  &.fabOpen {
+    width: 56px;
+    padding: 0;
+    border-radius: $radius-full;
+  }
+}
+
+.fabLabel {
+  @include body;
+  font-size: $type-sm;
+  color: var(--bg-primary);
+  white-space: nowrap;
+
+  @include below($bp-sm) {
+    display: none;
+  }
+}
+
+.panel {
+  position: fixed;
+  bottom: calc(#{$space-5} + 56px + #{$space-3});
+  right: $space-5;
+  z-index: $z-chat;
+  width: 400px;
+  height: 560px;
+  border-radius: $radius-lg;
+  overflow: hidden;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+
+  @include below($bp-sm) {
+    width: calc(100vw - #{$space-5} * 2);
+    height: calc(100vh - 140px);
+    bottom: calc(#{$space-5} + 56px + #{$space-2});
+    right: $space-3;
+  }
+}
+
+.chatkit {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.fallback {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: $space-5;
+  text-align: center;
+}
+
+.fallbackTitle {
+  font-family: $font-stack;
+  font-size: $type-base;
+  color: var(--text-primary);
+  margin-bottom: $space-2;
+}
+
+.fallbackText {
+  font-family: $font-stack;
+  font-size: $type-sm;
+  color: var(--text-muted);
+}

@@ -1,14 +1,23 @@
 import Link from "next/link";
 import Image from "next/image";
 import TentIcon from "@/components/TentIcon";
-import galleryData from "@/data/instagram-posts.json";
+import HeroVideo from "@/components/HeroVideo";
+import { getFrontpageImages, getGalleryImages } from "@/lib/images";
 import s from "./page.module.scss";
 
 export default function Home() {
+  const frontpageImages = getFrontpageImages();
+  const featuredImages =
+    frontpageImages.length > 0
+      ? frontpageImages.slice(0, 6)
+      : getGalleryImages().slice(0, 6);
+
   return (
     <>
       {/* Hero */}
       <section className={s.hero}>
+        <HeroVideo className={s.heroVideo} />
+        <div className={s.heroOverlay} />
         <div className={s.heroWatermark}>
           <TentIcon size={400} variant="white" />
         </div>
@@ -62,11 +71,11 @@ export default function Home() {
           <p className={s.sectionLabel}>Udvalgt arbejde</p>
           <h2 className={s.featuredHeading}>Seneste tatoveringer</h2>
           <div className={s.featuredGrid}>
-            {galleryData.slice(0, 6).map((post) => (
-              <div key={post.shortcode} className={s.featuredItem}>
+            {featuredImages.map((img) => (
+              <div key={img.id} className={s.featuredItem}>
                 <Image
-                  src={post.src}
-                  alt={post.caption ? post.caption.split("\n")[0].substring(0, 60) : "Tatovering"}
+                  src={img.src}
+                  alt={img.alt_text || "Tatovering"}
                   width={640}
                   height={640}
                   unoptimized

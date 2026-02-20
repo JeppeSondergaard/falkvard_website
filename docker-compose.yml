@@ -8,6 +8,7 @@ services:
     volumes:
       - ./src:/app/src
       - ./public:/app/public
+      - ./data:/app/data
       - ./next.config.ts:/app/next.config.ts
     environment:
       - NODE_ENV=development

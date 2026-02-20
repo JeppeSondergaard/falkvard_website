@@ -12,12 +12,9 @@ const SUBTITLE = 'TATOVERINGER MED SJÆL'
 const T = {
   FADE_UP: 200,
   TITLE: 400,
-  DRAW_LOGO: 600,
+  LOGO: 600,
   SUBTITLE: 2200,
-  WIGGLE: 2400,
-  CROSSFADE: 3200,
-  FADE_DARK: 4200,
-  CTA: 5200,
+  CTA: 4500,
 }
 
 export default function IntroPage() {
@@ -25,8 +22,7 @@ export default function IntroPage() {
   const [phase, setPhase] = useState(0)
   const [bgVisible, setBgVisible] = useState(false)
   const [fadeDark, setFadeDark] = useState(true)
-  const [logoDrawing, setLogoDrawing] = useState(false)
-  const [logoWiggling, setLogoWiggling] = useState(false)
+  const [logoVisible, setLogoVisible] = useState(false)
   const timersRef = useRef<ReturnType<typeof setTimeout>[]>([])
   const titleShown = useRef(false)
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -49,17 +45,15 @@ export default function IntroPage() {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       setPhase(5)
       setFadeDark(false)
-      setBgVisible(true)
       return
     }
 
     const t: ReturnType<typeof setTimeout>[] = []
     t.push(setTimeout(() => { setFadeDark(false); setBgVisible(true) }, T.FADE_UP))
     t.push(setTimeout(() => setPhase(1), T.TITLE))
-    t.push(setTimeout(() => { setLogoDrawing(true); setPhase(2) }, T.DRAW_LOGO))
-    t.push(setTimeout(() => { setPhase(3); setLogoWiggling(true) }, T.SUBTITLE))
-    t.push(setTimeout(() => { setFadeDark(true); setBgVisible(false); setPhase(4) }, T.FADE_DARK))
-    t.push(setTimeout(() => { setPhase(5); setFadeDark(false) }, T.CTA))
+    t.push(setTimeout(() => { setLogoVisible(true); setPhase(2) }, T.LOGO))
+    t.push(setTimeout(() => setPhase(3), T.SUBTITLE))
+    t.push(setTimeout(() => setPhase(5), T.CTA))
 
     timersRef.current = t
     return () => t.forEach(clearTimeout)
@@ -74,9 +68,8 @@ export default function IntroPage() {
       if (e.key === 'Escape') {
         timersRef.current.forEach(clearTimeout)
         setFadeDark(false)
-        setBgVisible(false)
-        setLogoDrawing(false)
-        setLogoWiggling(false)
+        setBgVisible(true)
+        setLogoVisible(true)
         setPhase(5)
       }
     }
@@ -85,9 +78,8 @@ export default function IntroPage() {
   }, [handleEnter])
 
   const showTitle = phase >= 1
-  const showSubtitle = (phase >= 3 && phase <= 4) || phase >= 5
+  const showSubtitle = phase >= 3
   const showCta = phase >= 5
-  const progressPercent = Math.min((phase / 5) * 100, 100)
 
   return (
     <div className={styles.introContainer} role="main" aria-label="Introduction">
@@ -97,7 +89,7 @@ export default function IntroPage() {
         </video>
       </div>
 
-      <LogoAnimation drawing={logoDrawing} wiggling={logoWiggling} />
+      <LogoAnimation visible={logoVisible} />
 
       <div className={styles.vignette} />
 
@@ -159,6 +151,7 @@ export default function IntroPage() {
 
       <motion.button
         className={styles.skipButton}
+        initial={{ opacity: 0 }}
         animate={{ opacity: phase >= 1 && phase < 5 ? 1 : 0 }}
         transition={{ duration: 0.6, delay: phase >= 1 && phase < 5 ? 1 : 0 }}
         onClick={handleEnter}
@@ -168,17 +161,6 @@ export default function IntroPage() {
       >
         Skip &rarr;
       </motion.button>
-
-      <div className={styles.progressTrack}>
-        <div
-          className={styles.progressBar}
-          style={{ width: `${progressPercent}%` }}
-          role="progressbar"
-          aria-valuenow={progressPercent}
-          aria-valuemin={0}
-          aria-valuemax={100}
-        />
-      </div>
 
       <span className={styles.screenReaderOnly}>
         Immersive introduction to Falkvard Tattoo. Press Enter or Escape to skip.

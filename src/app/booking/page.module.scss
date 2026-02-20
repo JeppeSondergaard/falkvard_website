@@ -2,10 +2,10 @@
 @use '@/styles/mixins' as *;
 @use '@/styles/typography' as *;
 
-// ===== WRAPPER =====
+// ===== LAYOUT =====
 .section {
   @include section-padding;
-  background: var(--bg-secondary);
+  background: var(--bg-primary);
 }
 
 .inner {
@@ -13,37 +13,81 @@
   max-width: $max-width-narrow;
 }
 
-.formCard {
-  @include card-base;
-  padding: $space-6;
+.heading {
+  @include heading;
+  font-size: $type-4xl;
+  margin-bottom: $space-3;
+  text-align: center;
+
+  @include below($bp-md) {
+    font-size: $type-3xl;
+  }
 }
 
-// ===== PROGRESS =====
-.progress {
+.intro {
+  @include body;
+  font-size: $type-md;
+  color: var(--text-secondary);
+  text-align: center;
+  margin-bottom: $space-7;
+}
+
+// ===== STEPS =====
+.steps {
   display: flex;
+  align-items: center;
   justify-content: center;
-  gap: $space-2;
+  gap: $space-3;
   margin-bottom: $space-6;
 }
 
-.progressStep {
-  width: 12px;
-  height: 12px;
-  border-radius: $radius-full;
-  background: var(--border);
-  transition: background $transition-fast;
+.stepDot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $space-1;
+  opacity: 0.4;
+  transition: opacity $transition-fast;
 
-  &.active {
-    background: var(--accent);
-    box-shadow: 0 0 0 2px var(--bg-elevated);
+  span {
+    @include heading;
+    font-size: $type-lg;
+    width: 40px;
+    height: 40px;
+    border-radius: $radius-full;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
-  &.done {
-    background: var(--text-muted);
+  small {
+    @include body;
+    font-size: $type-xs;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  &.active {
+    opacity: 1;
+
+    span {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: var(--bg-primary);
+    }
   }
 }
 
-// ===== STEP 1 — SERVICE CARDS =====
+.stepLine {
+  width: 60px;
+  height: 1px;
+  background: var(--border);
+  margin-bottom: $space-4;
+}
+
+// ===== SERVICE CARDS =====
 .serviceGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -58,16 +102,12 @@
   @include card-base;
   padding: $space-5;
   cursor: pointer;
-  text-align: center;
-  border: 2px solid transparent;
-  transition: border-color $transition-fast, box-shadow $transition-base;
-
-  &:hover {
-    border-color: var(--accent-border);
-  }
+  text-align: left;
+  @include card-hover;
 
   &.selected {
-    border: 2px solid var(--accent);
+    border-color: var(--accent);
+    box-shadow: var(--shadow-md);
   }
 }
 
@@ -75,7 +115,6 @@
   @include heading;
   font-size: $type-lg;
   margin-bottom: $space-2;
-  color: var(--text-primary);
 }
 
 .serviceDesc {
@@ -84,110 +123,87 @@
   color: var(--text-muted);
 }
 
-// ===== FORM FIELDS (STEPS 2 & 3) =====
-.fieldGroup {
+// ===== FORM =====
+.backBtn {
+  @include body;
+  font-size: $type-sm;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
   margin-bottom: $space-4;
+  transition: color $transition-fast;
+
+  &:hover {
+    color: var(--text-primary);
+  }
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: $space-4;
+}
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: $space-1;
+  flex: 1;
+}
+
+.fieldRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $space-4;
+
+  @include below($bp-sm) {
+    grid-template-columns: 1fr;
+  }
 }
 
 .label {
-  @include section-label;
-  display: block;
-  margin-bottom: $space-1;
+  @include body;
+  font-size: $type-xs;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
 }
 
 .input,
-.select,
 .textarea {
-  width: 100%;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
-  border-radius: $radius-sm;
-  padding: $space-2 $space-3;
-  font-family: $font-stack;
+  @include body;
   font-size: $type-base;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: $radius-md;
+  padding: $space-3;
   color: var(--text-primary);
   transition: border-color $transition-fast;
+
+  &::placeholder {
+    color: var(--text-muted);
+  }
 
   &:focus {
     outline: none;
     border-color: var(--accent);
   }
-
-  &::placeholder {
-    color: var(--text-muted);
-  }
 }
 
 .textarea {
-  min-height: 100px;
   resize: vertical;
+  min-height: 100px;
 }
 
-.select {
-  cursor: pointer;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='%23A0A0A0'%3E%3Cpath d='M6 8L1 3h10z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right $space-3 center;
-  padding-right: $space-7;
-}
-
-// ===== FILE UPLOAD DROP ZONE =====
-.fileZone {
-  border: 2px dashed var(--border);
+.errorMsg {
+  @include body;
+  font-size: $type-sm;
+  color: #e55;
+  padding: $space-2 $space-3;
+  border: 1px solid rgba(238, 85, 85, 0.3);
   border-radius: $radius-md;
-  padding: $space-6;
-  text-align: center;
-  background: var(--bg-secondary);
-  cursor: pointer;
-  transition: border-color $transition-fast, background $transition-fast;
-
-  &:hover,
-  &.dragover {
-    border-color: var(--accent);
-    background: var(--accent-subtle);
-  }
-}
-
-.fileZoneText {
-  @include body;
-  font-size: $type-sm;
-  color: var(--text-muted);
-}
-
-.fileInput {
-  @include sr-only;
-}
-
-// ===== CONFIRMATION (STEP 4) =====
-.summaryCard {
-  @include card-base;
-  padding: $space-5;
-  margin-bottom: $space-5;
-}
-
-.summaryTitle {
-  @include section-label;
-  margin-bottom: $space-4;
-}
-
-.summaryRow {
-  @include body;
-  font-size: $type-sm;
-  color: var(--text-secondary);
-  margin-bottom: $space-2;
-
-  strong {
-    color: var(--text-primary);
-    margin-right: $space-2;
-  }
-}
-
-.confirmNote {
-  @include body;
-  font-size: $type-sm;
-  color: var(--text-muted);
-  margin-bottom: $space-5;
+  background: rgba(238, 85, 85, 0.08);
 }
 
 .submitBtn {
@@ -195,13 +211,68 @@
   font-size: $type-sm;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  padding: $space-3 $space-5;
+  padding: $space-3 $space-6;
   background: var(--accent);
   color: var(--bg-primary);
   border: none;
-  border-radius: $radius-sm;
   cursor: pointer;
-  transition: background $transition-fast, transform $transition-fast;
+  transition: all $transition-fast;
+  align-self: flex-start;
+
+  &:hover:not(:disabled) {
+    background: var(--accent-hover);
+    transform: scale(1.02);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// ===== SUCCESS =====
+.successState {
+  text-align: center;
+  padding: $space-7 0;
+}
+
+.successIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: $radius-full;
+  background: var(--accent);
+  color: var(--bg-primary);
+  font-size: $type-2xl;
+  margin-bottom: $space-4;
+}
+
+.successTitle {
+  @include heading;
+  font-size: $type-2xl;
+  margin-bottom: $space-3;
+}
+
+.successText {
+  @include body;
+  font-size: $type-md;
+  color: var(--text-secondary);
+  margin-bottom: $space-6;
+}
+
+.ctaBtn {
+  @include heading;
+  font-size: $type-sm;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  display: inline-block;
+  padding: $space-3 $space-7;
+  background: var(--accent);
+  color: var(--bg-primary);
+  transition: all $transition-fast;
 
   &:hover {
     background: var(--accent-hover);
@@ -209,50 +280,63 @@
   }
 }
 
-// ===== NAV BUTTONS =====
-.navRow {
-  display: flex;
-  justify-content: space-between;
-  gap: $space-4;
-  margin-top: $space-6;
-  padding-top: $space-4;
-  border-top: 1px solid var(--border);
+// ===== FAQ =====
+.faqSection {
+  @include section-padding;
+  background: var(--bg-secondary);
 }
 
-.navBtn {
-  @include heading;
-  font-size: $type-sm;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  padding: $space-2 $space-4;
-  background: transparent;
-  color: var(--accent);
-  border: 1px solid var(--accent);
-  border-radius: $radius-sm;
-  cursor: pointer;
-  transition: background $transition-fast, color $transition-fast;
-
-  &:hover {
-    background: var(--accent-subtle);
-    color: var(--accent-hover);
-  }
-}
-
-.navBtnPrimary {
-  background: var(--accent);
-  color: var(--bg-primary);
-  border-color: var(--accent);
-
-  &:hover {
-    background: var(--accent-hover);
-    color: var(--bg-primary);
-  }
-}
-
-.pageTitle {
+.faqHeading {
   @include heading;
   font-size: $type-2xl;
   margin-bottom: $space-6;
   text-align: center;
+}
+
+.faqList {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+  max-width: $max-width-narrow;
+  margin: 0 auto;
+}
+
+.faqItem {
+  border: 1px solid var(--border);
+  border-radius: $radius-md;
+  overflow: hidden;
+  transition: border-color $transition-fast;
+
+  &.faqOpen {
+    border-color: var(--accent-border);
+  }
+}
+
+.faqQuestion {
+  @include heading;
+  font-size: $type-base;
+  width: 100%;
+  text-align: left;
+  padding: $space-4;
+  background: var(--bg-elevated);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: $space-3;
   color: var(--text-primary);
+}
+
+.faqToggle {
+  font-size: $type-xl;
+  flex-shrink: 0;
+  color: var(--accent);
+}
+
+.faqAnswer {
+  @include body;
+  font-size: $type-sm;
+  color: var(--text-secondary);
+  padding: 0 $space-4 $space-4;
 }

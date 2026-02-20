@@ -1,0 +1,296 @@
+@use '@/styles/variables' as *;
+@use '@/styles/mixins' as *;
+@use '@/styles/typography' as *;
+
+.section {
+  min-height: 100vh;
+  background: var(--bg-primary);
+  padding: $space-6 $space-4;
+}
+
+.inner {
+  @include container;
+  max-width: $max-width-wide;
+}
+
+.loading {
+  @include body;
+  text-align: center;
+  padding: $space-9 0;
+  color: var(--text-muted);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $space-6;
+}
+
+.title {
+  @include heading;
+  font-size: $type-3xl;
+}
+
+.logoutBtn {
+  @include body;
+  font-size: $type-sm;
+  color: var(--text-muted);
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: $radius-md;
+  padding: $space-2 $space-4;
+  cursor: pointer;
+  transition: all $transition-fast;
+
+  &:hover {
+    color: var(--text-primary);
+    border-color: var(--text-primary);
+  }
+}
+
+// Stats
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: $space-3;
+  margin-bottom: $space-5;
+
+  @include below($bp-md) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.statCard {
+  @include card-base;
+  padding: $space-4;
+  text-align: center;
+}
+
+.statNum {
+  @include heading;
+  font-size: $type-3xl;
+  display: block;
+}
+
+.statLabel {
+  @include body;
+  font-size: $type-xs;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+// Filters
+.filterBar {
+  display: flex;
+  gap: $space-2;
+  margin-bottom: $space-5;
+  flex-wrap: wrap;
+}
+
+.filterBtn {
+  @include body;
+  font-size: $type-sm;
+  padding: $space-2 $space-4;
+  border-radius: $radius-full;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all $transition-fast;
+
+  &:hover {
+    border-color: var(--accent-border);
+  }
+
+  &.active {
+    background: var(--accent);
+    color: var(--bg-primary);
+    border-color: var(--accent);
+  }
+}
+
+.empty {
+  @include body;
+  text-align: center;
+  padding: $space-7 0;
+  color: var(--text-muted);
+}
+
+// Booking list
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+}
+
+.bookingCard {
+  @include card-base;
+  overflow: hidden;
+}
+
+.bookingHeader {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $space-4;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  gap: $space-3;
+}
+
+.bookingMeta {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+  flex-wrap: wrap;
+}
+
+.bookingName {
+  @include heading;
+  font-size: $type-base;
+}
+
+.bookingService {
+  @include body;
+  font-size: $type-xs;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.agentBadge {
+  @include heading;
+  font-size: $type-xs;
+  padding: 2px 8px;
+  border-radius: $radius-full;
+  background: var(--accent);
+  color: var(--bg-primary);
+}
+
+.bookingRight {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+  flex-shrink: 0;
+}
+
+.statusBadge {
+  @include body;
+  font-size: $type-xs;
+  padding: 2px 10px;
+  border-radius: $radius-full;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+
+  &.pending {
+    background: rgba(255, 200, 0, 0.15);
+    color: #cc0;
+  }
+
+  &.approved {
+    background: rgba(0, 200, 100, 0.15);
+    color: #0c6;
+  }
+
+  &.rejected {
+    background: rgba(255, 80, 80, 0.15);
+    color: #e55;
+  }
+
+  &.completed {
+    background: rgba(150, 150, 150, 0.15);
+    color: var(--text-muted);
+  }
+}
+
+.bookingDate {
+  @include body;
+  font-size: $type-xs;
+  color: var(--text-muted);
+}
+
+// Details
+.bookingDetails {
+  padding: 0 $space-4 $space-4;
+  border-top: 1px solid var(--border);
+}
+
+.detailGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $space-2;
+  padding-top: $space-3;
+
+  @include below($bp-sm) {
+    grid-template-columns: 1fr;
+  }
+
+  strong {
+    color: var(--text-muted);
+    font-weight: 400;
+    font-size: $type-xs;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  div {
+    @include body;
+    font-size: $type-sm;
+    color: var(--text-primary);
+  }
+}
+
+.fullWidth {
+  grid-column: 1 / -1;
+}
+
+.descriptionText {
+  margin-top: $space-1;
+  white-space: pre-wrap;
+  color: var(--text-secondary);
+}
+
+.actions {
+  display: flex;
+  gap: $space-3;
+  margin-top: $space-4;
+}
+
+.approveBtn {
+  @include heading;
+  font-size: $type-xs;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: $space-2 $space-5;
+  background: var(--accent);
+  color: var(--bg-primary);
+  border: none;
+  cursor: pointer;
+  transition: all $transition-fast;
+
+  &:hover {
+    background: var(--accent-hover);
+  }
+}
+
+.rejectBtn {
+  @include heading;
+  font-size: $type-xs;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: $space-2 $space-5;
+  background: transparent;
+  color: #e55;
+  border: 1px solid #e55;
+  cursor: pointer;
+  transition: all $transition-fast;
+
+  &:hover {
+    background: rgba(238, 85, 85, 0.1);
+  }
+}

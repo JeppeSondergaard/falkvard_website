@@ -1,458 +1,359 @@
 "use client";
 
 import { useState, useRef } from "react";
+import Link from "next/link";
 import s from "./page.module.scss";
 
 type ServiceType = "tatovering" | "piercing" | "konsultation" | "";
+type SubmitState = "idle" | "loading" | "success" | "error";
 
-const STIL_OPTIONS = [
-  { value: "nordisk", label: "Nordisk" },
-  { value: "ornamental", label: "Ornamental" },
-  { value: "dark-art", label: "Dark Art" },
-  { value: "blomster", label: "Blomster" },
-  { value: "andet", label: "Andet" },
-];
-
-const STORRELSE_OPTIONS = [
-  { value: "lille", label: "Lille (<10cm)" },
-  { value: "mellem", label: "Mellem (10–20cm)" },
-  { value: "stor", label: "Stor (>20cm)" },
-];
-
-const PIERCING_PLACERING = [
-  { value: "ore", label: "Øre" },
-  { value: "naese", label: "Næse" },
-  { value: "navle", label: "Navle" },
-  { value: "andet", label: "Andet" },
+const FAQ = [
+  {
+    q: "Hvor lang tid tager en tatovering?",
+    a: "Det kommer helt an på størrelse og detaljegrad. Små tatoveringer tager typisk 1-2 timer, mens større projekter kan tage flere sessioner.",
+  },
+  {
+    q: "Gør det ondt?",
+    a: "Smerte er individuelt, men de fleste beskriver det som et ubehag der er til at holde ud. Vi sørger for, at du er så komfortabel som muligt.",
+  },
+  {
+    q: "Kan jeg tage en ven med?",
+    a: "Ja, du er velkommen til at tage én person med til din session.",
+  },
+  {
+    q: "Hvad koster en tatovering?",
+    a: "Prisen afhænger af størrelse, kompleksitet og placering. Minimum er 800 kr. Vi aftaler altid en fast pris inden vi starter.",
+  },
+  {
+    q: "Skal jeg have en idé klar?",
+    a: "Det behøver du ikke! Vi kan sagtens designe noget sammen baseret på dine ønsker og idéer. Book en konsultation, så tager vi en snak.",
+  },
 ];
 
 export default function BookingPage() {
-  const [step, setStep] = useState(1);
   const [service, setService] = useState<ServiceType>("");
-  // Step 2 – Tatovering
-  const [stil, setStil] = useState("");
-  const [storrelse, setStorrelse] = useState("");
-  const [placering, setPlacering] = useState("");
-  const [beskrivelse, setBeskrivelse] = useState("");
-  const [referenceFile, setReferenceFile] = useState<File | null>(null);
-  // Step 2 – Piercing
-  const [piercingPlacering, setPiercingPlacering] = useState("");
-  // Step 2 – Konsultation
-  const [konsultationBeskrivelse, setKonsultationBeskrivelse] = useState("");
-  // Step 3
-  const [navn, setNavn] = useState("");
-  const [email, setEmail] = useState("");
-  const [telefon, setTelefon] = useState("");
-  const [dato, setDato] = useState("");
-  const [bemaerkninger, setBemaerkninger] = useState("");
+  const [step, setStep] = useState(1);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [submitState, setSubmitState] = useState<SubmitState>("idle");
+  const [submitError, setSubmitError] = useState("");
+  const formRef = useRef<HTMLFormElement>(null);
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (file) setReferenceFile(file);
+  function handleServiceSelect(svc: ServiceType) {
+    setService(svc);
+    setStep(2);
   }
 
-  function handleDrop(e: React.DragEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const file = e.dataTransfer.files?.[0];
-    if (file) setReferenceFile(file);
-  }
+    setSubmitState("loading");
+    setSubmitError("");
 
-  function handleDragOver(e: React.DragEvent) {
-    e.preventDefault();
-  }
+    const form = formRef.current;
+    if (!form) return;
 
-  function canProceedStep1() {
-    return service !== "";
-  }
+    const data = new FormData(form);
+    const body = {
+      name: data.get("name") as string,
+      email: data.get("email") as string,
+      phone: data.get("phone") as string,
+      service,
+      placement: data.get("placement") as string,
+      size: data.get("size") as string,
+      description: data.get("description") as string,
+      reference_urls: (data.get("reference") as string) || undefined,
+    };
 
-  function canProceedStep2() {
-    if (service === "tatovering") {
-      return stil && storrelse && placering.trim() && beskrivelse.trim();
+    try {
+      const res = await fetch("/api/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => null);
+        throw new Error(err?.error || "Noget gik galt. Prøv igen.");
+      }
+
+      setSubmitState("success");
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : "Ukendt fejl");
+      setSubmitState("error");
     }
-    if (service === "piercing") {
-      return piercingPlacering !== "";
-    }
-    if (service === "konsultation") {
-      return konsultationBeskrivelse.trim() !== "";
-    }
-    return false;
   }
 
-  function canProceedStep3() {
-    return navn.trim() !== "" && email.trim() !== "";
-  }
-
-  function handleNext() {
-    if (step < 4) setStep(step + 1);
-  }
-
-  function handleBack() {
-    if (step > 1) setStep(step - 1);
-  }
-
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    // TODO: send booking request
+  if (submitState === "success") {
+    return (
+      <section className={s.section}>
+        <div className={s.inner}>
+          <div className={s.successState}>
+            <span className={s.successIcon}>&#10003;</span>
+            <h2 className={s.successTitle}>Tak for din forespørgsel!</h2>
+            <p className={s.successText}>
+              Vi har modtaget din booking-forespørgsel og vender tilbage
+              hurtigst muligt. Tjek din email for en bekræftelse.
+            </p>
+            <Link href="/" className={s.ctaBtn}>
+              Tilbage til forsiden
+            </Link>
+          </div>
+        </div>
+      </section>
+    );
   }
 
   return (
-    <section className={s.section}>
-      <div className={s.inner}>
-        <h1 className={s.pageTitle}>Book en tid</h1>
+    <>
+      <section className={s.section}>
+        <div className={s.inner}>
+          <h1 className={s.heading}>Book en tid</h1>
+          <p className={s.intro}>
+            Udfyld formularen herunder, så vender jeg tilbage hurtigst muligt
+            med en bekræftelse og evt. designforslag.
+          </p>
 
-        <div className={s.formCard}>
-          {/* Progress indicator */}
-          <div className={s.progress} role="tablist" aria-label="Trin">
-            {[1, 2, 3, 4].map((i) => (
-              <span
-                key={i}
-                className={`${s.progressStep} ${step === i ? s.active : ""} ${step > i ? s.done : ""}`}
-                aria-current={step === i ? "step" : undefined}
-              />
-            ))}
+          {/* Step indicators */}
+          <div className={s.steps}>
+            <div className={`${s.stepDot} ${step >= 1 ? s.active : ""}`}>
+              <span>1</span>
+              <small>Ydelse</small>
+            </div>
+            <div className={s.stepLine} />
+            <div className={`${s.stepDot} ${step >= 2 ? s.active : ""}`}>
+              <span>2</span>
+              <small>Detaljer</small>
+            </div>
           </div>
 
-          <form onSubmit={handleSubmit}>
-            {/* Step 1 — Service */}
-            {step === 1 && (
-              <div className={s.serviceGrid}>
-                {[
-                  {
-                    id: "tatovering" as const,
-                    title: "Tatovering",
-                    desc: "Unikke tatoveringer tilpasset dig",
-                  },
-                  {
-                    id: "piercing" as const,
-                    title: "Piercing",
-                    desc: "Professionel piercing i trygge rammer",
-                  },
-                  {
-                    id: "konsultation" as const,
-                    title: "Konsultation",
-                    desc: "Snak om idé og design først",
-                  },
-                ].map((opt) => (
-                  <button
-                    key={opt.id}
-                    type="button"
-                    className={`${s.serviceCard} ${service === opt.id ? s.selected : ""}`}
-                    onClick={() => setService(opt.id)}
-                  >
-                    <h2 className={s.serviceTitle}>{opt.title}</h2>
-                    <p className={s.serviceDesc}>{opt.desc}</p>
-                  </button>
-                ))}
-              </div>
-            )}
+          {/* Step 1: Service selection */}
+          {step === 1 && (
+            <div className={s.serviceGrid}>
+              <button
+                type="button"
+                className={`${s.serviceCard} ${service === "tatovering" ? s.selected : ""}`}
+                onClick={() => handleServiceSelect("tatovering")}
+              >
+                <h3 className={s.serviceTitle}>Tatovering</h3>
+                <p className={s.serviceDesc}>
+                  Book en tid til ny tatovering, touch-up eller cover-up.
+                </p>
+              </button>
+              <button
+                type="button"
+                className={`${s.serviceCard} ${service === "piercing" ? s.selected : ""}`}
+                onClick={() => handleServiceSelect("piercing")}
+              >
+                <h3 className={s.serviceTitle}>Piercing</h3>
+                <p className={s.serviceDesc}>
+                  Professionel piercing med kvalitetssmykker i titanium.
+                </p>
+              </button>
+              <button
+                type="button"
+                className={`${s.serviceCard} ${service === "konsultation" ? s.selected : ""}`}
+                onClick={() => handleServiceSelect("konsultation")}
+              >
+                <h3 className={s.serviceTitle}>Konsultation</h3>
+                <p className={s.serviceDesc}>
+                  Gratis snak om dit projekt inden du beslutter dig.
+                </p>
+              </button>
+            </div>
+          )}
 
-            {/* Step 2 — Details */}
-            {step === 2 && (
-              <>
+          {/* Step 2: Detail form */}
+          {step === 2 && (
+            <>
+              <button
+                type="button"
+                className={s.backBtn}
+                onClick={() => setStep(1)}
+              >
+                &larr; Tilbage
+              </button>
+              <form
+                ref={formRef}
+                className={s.form}
+                onSubmit={handleSubmit}
+              >
+                <div className={s.fieldGroup}>
+                  <label className={s.label} htmlFor="name">
+                    Navn *
+                  </label>
+                  <input
+                    id="name"
+                    name="name"
+                    type="text"
+                    required
+                    className={s.input}
+                    placeholder="Dit fulde navn"
+                  />
+                </div>
+
+                <div className={s.fieldRow}>
+                  <div className={s.fieldGroup}>
+                    <label className={s.label} htmlFor="email">
+                      Email *
+                    </label>
+                    <input
+                      id="email"
+                      name="email"
+                      type="email"
+                      required
+                      className={s.input}
+                      placeholder="din@email.dk"
+                    />
+                  </div>
+                  <div className={s.fieldGroup}>
+                    <label className={s.label} htmlFor="phone">
+                      Telefon
+                    </label>
+                    <input
+                      id="phone"
+                      name="phone"
+                      type="tel"
+                      className={s.input}
+                      placeholder="+45 ..."
+                    />
+                  </div>
+                </div>
+
                 {service === "tatovering" && (
                   <>
-                    <div className={s.fieldGroup}>
-                      <label className={s.label} htmlFor="stil">
-                        Stil
-                      </label>
-                      <select
-                        id="stil"
-                        className={s.select}
-                        value={stil}
-                        onChange={(e) => setStil(e.target.value)}
-                        required
-                      >
-                        <option value="">Vælg stil</option>
-                        {STIL_OPTIONS.map((o) => (
-                          <option key={o.value} value={o.value}>
-                            {o.label}
-                          </option>
-                        ))}
-                      </select>
+                    <div className={s.fieldRow}>
+                      <div className={s.fieldGroup}>
+                        <label className={s.label} htmlFor="placement">
+                          Placering
+                        </label>
+                        <input
+                          id="placement"
+                          name="placement"
+                          type="text"
+                          className={s.input}
+                          placeholder="F.eks. underarm, ryg"
+                        />
+                      </div>
+                      <div className={s.fieldGroup}>
+                        <label className={s.label} htmlFor="size">
+                          Ca. størrelse
+                        </label>
+                        <input
+                          id="size"
+                          name="size"
+                          type="text"
+                          className={s.input}
+                          placeholder="F.eks. 10x15 cm"
+                        />
+                      </div>
                     </div>
+
                     <div className={s.fieldGroup}>
-                      <label className={s.label} htmlFor="storrelse">
-                        Størrelse
-                      </label>
-                      <select
-                        id="storrelse"
-                        className={s.select}
-                        value={storrelse}
-                        onChange={(e) => setStorrelse(e.target.value)}
-                        required
-                      >
-                        <option value="">Vælg størrelse</option>
-                        {STORRELSE_OPTIONS.map((o) => (
-                          <option key={o.value} value={o.value}>
-                            {o.label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className={s.fieldGroup}>
-                      <label className={s.label} htmlFor="placering">
-                        Placering
-                      </label>
-                      <input
-                        id="placering"
-                        type="text"
-                        className={s.input}
-                        value={placering}
-                        onChange={(e) => setPlacering(e.target.value)}
-                        placeholder="F.eks. underarm, ryg"
-                        required
-                      />
-                    </div>
-                    <div className={s.fieldGroup}>
-                      <label className={s.label} htmlFor="beskrivelse">
-                        Beskrivelse af idé
+                      <label className={s.label} htmlFor="description">
+                        Beskriv dit ønskedesign *
                       </label>
                       <textarea
-                        id="beskrivelse"
-                        className={s.textarea}
-                        value={beskrivelse}
-                        onChange={(e) => setBeskrivelse(e.target.value)}
+                        id="description"
+                        name="description"
                         required
+                        rows={5}
+                        className={s.textarea}
+                        placeholder="Fortæl om din idé, stil, motiver..."
                       />
                     </div>
+
                     <div className={s.fieldGroup}>
-                      <label className={s.label}>Upload reference</label>
-                      <div
-                        className={s.fileZone}
-                        onDrop={handleDrop}
-                        onDragOver={handleDragOver}
-                        onClick={() => fileInputRef.current?.click()}
-                      >
-                        <input
-                          ref={fileInputRef}
-                          type="file"
-                          className={s.fileInput}
-                          accept="image/*"
-                          onChange={handleFileChange}
-                        />
-                        <span className={s.fileZoneText}>
-                          {referenceFile
-                            ? referenceFile.name
-                            : "Træk fil hertil eller klik for at vælge"}
-                        </span>
-                      </div>
+                      <label className={s.label} htmlFor="reference">
+                        Reference-billeder (links)
+                      </label>
+                      <input
+                        id="reference"
+                        name="reference"
+                        type="text"
+                        className={s.input}
+                        placeholder="Pinterest, Instagram links..."
+                      />
                     </div>
                   </>
                 )}
+
                 {service === "piercing" && (
                   <div className={s.fieldGroup}>
-                    <label className={s.label} htmlFor="piercing-placering">
-                      Placering
-                    </label>
-                    <select
-                      id="piercing-placering"
-                      className={s.select}
-                      value={piercingPlacering}
-                      onChange={(e) => setPiercingPlacering(e.target.value)}
-                      required
-                    >
-                      <option value="">Vælg placering</option>
-                      {PIERCING_PLACERING.map((o) => (
-                        <option key={o.value} value={o.value}>
-                          {o.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-                {service === "konsultation" && (
-                  <div className={s.fieldGroup}>
-                    <label className={s.label} htmlFor="konsultation-beskrivelse">
-                      Beskrivelse
+                    <label className={s.label} htmlFor="description">
+                      Hvilken piercing? *
                     </label>
                     <textarea
-                      id="konsultation-beskrivelse"
-                      className={s.textarea}
-                      value={konsultationBeskrivelse}
-                      onChange={(e) => setKonsultationBeskrivelse(e.target.value)}
+                      id="description"
+                      name="description"
                       required
+                      rows={3}
+                      className={s.textarea}
+                      placeholder="F.eks. helix, septum, nostril..."
                     />
                   </div>
                 )}
-              </>
-            )}
 
-            {/* Step 3 — Contact */}
-            {step === 3 && (
-              <>
-                <div className={s.fieldGroup}>
-                  <label className={s.label} htmlFor="navn">
-                    Navn
-                  </label>
-                  <input
-                    id="navn"
-                    type="text"
-                    className={s.input}
-                    value={navn}
-                    onChange={(e) => setNavn(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className={s.fieldGroup}>
-                  <label className={s.label} htmlFor="email">
-                    Email
-                  </label>
-                  <input
-                    id="email"
-                    type="email"
-                    className={s.input}
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className={s.fieldGroup}>
-                  <label className={s.label} htmlFor="telefon">
-                    Telefon
-                  </label>
-                  <input
-                    id="telefon"
-                    type="tel"
-                    className={s.input}
-                    value={telefon}
-                    onChange={(e) => setTelefon(e.target.value)}
-                  />
-                </div>
-                <div className={s.fieldGroup}>
-                  <label className={s.label} htmlFor="dato">
-                    Foretrukken dato
-                  </label>
-                  <input
-                    id="dato"
-                    type="date"
-                    className={s.input}
-                    value={dato}
-                    onChange={(e) => setDato(e.target.value)}
-                  />
-                </div>
-                <div className={s.fieldGroup}>
-                  <label className={s.label} htmlFor="bemaerkninger">
-                    Evt. bemærkninger
-                  </label>
-                  <textarea
-                    id="bemaerkninger"
-                    className={s.textarea}
-                    value={bemaerkninger}
-                    onChange={(e) => setBemaerkninger(e.target.value)}
-                  />
-                </div>
-              </>
-            )}
+                {service === "konsultation" && (
+                  <div className={s.fieldGroup}>
+                    <label className={s.label} htmlFor="description">
+                      Hvad vil du gerne snakke om?
+                    </label>
+                    <textarea
+                      id="description"
+                      name="description"
+                      rows={3}
+                      className={s.textarea}
+                      placeholder="Kort beskrivelse af dit projekt..."
+                    />
+                  </div>
+                )}
 
-            {/* Step 4 — Confirmation */}
-            {step === 4 && (
-              <>
-                <div className={s.summaryCard}>
-                  <span className={s.summaryTitle}>Oversigt</span>
-                  <p className={s.summaryRow}>
-                    <strong>Service:</strong>{" "}
-                    {service === "tatovering"
-                      ? "Tatovering"
-                      : service === "piercing"
-                        ? "Piercing"
-                        : "Konsultation"}
-                  </p>
-                  {service === "tatovering" && (
-                    <>
-                      <p className={s.summaryRow}>
-                        <strong>Stil:</strong>{" "}
-                        {STIL_OPTIONS.find((o) => o.value === stil)?.label ?? stil}
-                      </p>
-                      <p className={s.summaryRow}>
-                        <strong>Størrelse:</strong>{" "}
-                        {STORRELSE_OPTIONS.find((o) => o.value === storrelse)?.label ?? storrelse}
-                      </p>
-                      <p className={s.summaryRow}>
-                        <strong>Placering:</strong> {placering}
-                      </p>
-                      <p className={s.summaryRow}>
-                        <strong>Beskrivelse:</strong> {beskrivelse}
-                      </p>
-                      {referenceFile && (
-                        <p className={s.summaryRow}>
-                          <strong>Reference:</strong> {referenceFile.name}
-                        </p>
-                      )}
-                    </>
-                  )}
-                  {service === "piercing" && (
-                    <p className={s.summaryRow}>
-                      <strong>Placering:</strong>{" "}
-                      {PIERCING_PLACERING.find((o) => o.value === piercingPlacering)?.label ??
-                        piercingPlacering}
-                    </p>
-                  )}
-                  {service === "konsultation" && (
-                    <p className={s.summaryRow}>
-                      <strong>Beskrivelse:</strong> {konsultationBeskrivelse}
-                    </p>
-                  )}
-                  <p className={s.summaryRow}>
-                    <strong>Navn:</strong> {navn}
-                  </p>
-                  <p className={s.summaryRow}>
-                    <strong>Email:</strong> {email}
-                  </p>
-                  {telefon && (
-                    <p className={s.summaryRow}>
-                      <strong>Telefon:</strong> {telefon}
-                    </p>
-                  )}
-                  {dato && (
-                    <p className={s.summaryRow}>
-                      <strong>Foretrukken dato:</strong> {dato}
-                    </p>
-                  )}
-                  {bemaerkninger && (
-                    <p className={s.summaryRow}>
-                      <strong>Bemærkninger:</strong> {bemaerkninger}
-                    </p>
-                  )}
-                </div>
-                <p className={s.confirmNote}>
-                  Vi vender tilbage inden for 24 timer.
-                </p>
-                <button type="submit" className={s.submitBtn}>
-                  Send forespørgsel
-                </button>
-              </>
-            )}
+                {submitState === "error" && submitError && (
+                  <p className={s.errorMsg}>{submitError}</p>
+                )}
 
-            {/* Navigation */}
-            {step < 4 && (
-              <div className={s.navRow}>
                 <button
-                  type="button"
-                  className={s.navBtn}
-                  onClick={handleBack}
-                  disabled={step === 1}
+                  type="submit"
+                  className={s.submitBtn}
+                  disabled={submitState === "loading"}
                 >
-                  Tilbage
+                  {submitState === "loading"
+                    ? "Sender..."
+                    : "Send forespørgsel"}
                 </button>
-                <button
-                  type="button"
-                  className={`${s.navBtn} ${s.navBtnPrimary}`}
-                  onClick={handleNext}
-                  disabled={
-                    (step === 1 && !canProceedStep1()) ||
-                    (step === 2 && !canProceedStep2()) ||
-                    (step === 3 && !canProceedStep3())
-                  }
-                >
-                  Næste
-                </button>
-              </div>
-            )}
-          </form>
+              </form>
+            </>
+          )}
         </div>
-      </div>
-    </section>
+      </section>
+
+      {/* FAQ */}
+      <section className={s.faqSection}>
+        <div className={s.inner}>
+          <h2 className={s.faqHeading}>Ofte stillede spørgsmål</h2>
+          <div className={s.faqList}>
+            {FAQ.map((item, i) => (
+              <div
+                key={i}
+                className={`${s.faqItem} ${openFaq === i ? s.faqOpen : ""}`}
+              >
+                <button
+                  type="button"
+                  className={s.faqQuestion}
+                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                >
+                  <span>{item.q}</span>
+                  <span className={s.faqToggle}>
+                    {openFaq === i ? "−" : "+"}
+                  </span>
+                </button>
+                {openFaq === i && (
+                  <p className={s.faqAnswer}>{item.a}</p>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    </>
   );
 }

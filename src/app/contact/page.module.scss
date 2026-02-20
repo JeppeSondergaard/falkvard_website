@@ -5,7 +5,7 @@
 // ===== HERO =====
 .hero {
   @include section-padding;
-  background: var(--bg-primary);
+  background: var(--bg-secondary);
   text-align: center;
 }
 
@@ -17,7 +17,7 @@
 .heroHeading {
   @include heading;
   font-size: $type-4xl;
-  margin-bottom: $space-4;
+  margin-bottom: $space-3;
 
   @include below($bp-md) {
     font-size: $type-3xl;
@@ -30,138 +30,52 @@
   color: var(--text-secondary);
 }
 
-// ===== TWO-COLUMN LAYOUT =====
-.contactSection {
+// ===== INFO =====
+.info {
   @include section-padding;
-  background: var(--bg-secondary);
 }
 
-.contactInner {
+.infoInner {
   @include container;
+}
+
+.infoGrid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: $space-8;
-  align-items: start;
+  grid-template-columns: repeat(3, 1fr);
+  gap: $space-4;
 
   @include below($bp-md) {
     grid-template-columns: 1fr;
-    gap: $space-6;
   }
 }
 
-// ===== FORM =====
-.form {
-  display: flex;
-  flex-direction: column;
-  gap: $space-4;
-}
-
-.label {
-  @include section-label;
-  display: block;
-  margin-bottom: $space-1;
-}
-
-.input,
-.select,
-.textarea {
-  width: 100%;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
-  border-radius: $radius-sm;
-  padding: $space-2 $space-3;
-  font-family: $font-stack;
-  font-size: $type-base;
-  color: var(--text-primary);
-  transition: border-color $transition-fast;
-
-  &:focus {
-    outline: none;
-    border-color: var(--accent);
-  }
-
-  &::placeholder {
-    color: var(--text-muted);
-  }
-}
-
-.textarea {
-  min-height: 120px;
-  resize: vertical;
-}
-
-.select {
-  cursor: pointer;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='%23A0A0A0'%3E%3Cpath d='M6 8L1 3h10z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right $space-3 center;
-  padding-right: $space-7;
-}
-
-.submitBtn {
-  @include heading;
-  font-size: $type-sm;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  padding: $space-3 $space-5;
-  background: var(--accent);
-  color: var(--bg-primary);
-  border: none;
-  border-radius: $radius-sm;
-  cursor: pointer;
-  transition: background $transition-fast, transform $transition-fast;
-  margin-top: $space-2;
-
-  &:hover {
-    background: var(--accent-hover);
-    transform: scale(1.02);
-  }
-}
-
-// ===== INFO CARDS =====
-.infoCards {
-  display: flex;
-  flex-direction: column;
-  gap: $space-4;
-}
-
-.addressCard {
-  @include card-accent;
-  padding: $space-4;
-}
-
-.hoursCard {
+.infoCard {
   @include card-base;
-  padding: $space-4;
+  padding: $space-5;
+  @include card-hover;
 }
 
-.socialCard {
-  @include card-ghost;
-  padding: $space-4;
-}
-
-.cardLabel {
-  @include section-label;
+.infoTitle {
+  @include heading;
+  font-size: $type-lg;
   margin-bottom: $space-2;
 }
 
-.cardContent {
+.infoText {
   @include body;
-  font-size: $type-md;
-  color: var(--text-secondary);
+  font-size: $type-base;
+  color: var(--text-primary);
+  margin-bottom: $space-1;
 }
 
-.cardSub {
+.infoNote {
   @include body;
   font-size: $type-sm;
   color: var(--text-muted);
-  margin-top: $space-1;
+  font-style: italic;
 }
 
-.socialLink {
-  @include body;
-  font-size: $type-md;
+.infoLink {
   color: var(--accent);
   text-decoration: none;
   transition: color $transition-fast;
@@ -171,23 +85,75 @@
   }
 }
 
-// ===== MAP PLACEHOLDER =====
+// ===== MAP =====
 .mapSection {
-  width: 100%;
+  @include section-padding;
+  background: var(--bg-secondary);
+}
+
+.mapInner {
+  @include container;
 }
 
 .mapPlaceholder {
   width: 100%;
-  height: 400px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
+  height: 300px;
+  border: 1px dashed var(--border);
+  border-radius: $radius-md;
   display: flex;
   align-items: center;
   justify-content: center;
+  background: var(--bg-elevated);
 }
 
-.mapPlaceholderText {
-  @include body;
-  font-size: $type-lg;
+.mapText {
+  @include heading;
+  font-size: $type-xl;
   color: var(--text-muted);
+}
+
+// ===== CTA =====
+.cta {
+  @include section-padding;
+  text-align: center;
+}
+
+.ctaInner {
+  @include container;
+  max-width: $max-width-narrow;
+}
+
+.ctaHeading {
+  @include heading;
+  font-size: $type-3xl;
+  margin-bottom: $space-4;
+
+  @include below($bp-md) {
+    font-size: $type-2xl;
+  }
+}
+
+.ctaText {
+  @include body;
+  font-size: $type-md;
+  color: var(--text-secondary);
+  margin-bottom: $space-6;
+}
+
+.ctaBtn {
+  @include heading;
+  font-size: $type-sm;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  display: inline-block;
+  padding: $space-3 $space-7;
+  background: var(--accent);
+  color: var(--bg-primary);
+  transition: all $transition-fast;
+
+  &:hover {
+    background: var(--accent-hover);
+    transform: scale(1.02);
+  }
 }
