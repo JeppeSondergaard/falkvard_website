@@ -1,0 +1,246 @@
+@use '@/styles/variables' as *;
+@use '@/styles/mixins' as *;
+@use '@/styles/typography' as *;
+
+.sectionLabel {
+  @include section-label;
+  margin-bottom: $space-2;
+}
+
+.container {
+  @include container;
+}
+
+.ghostLink {
+  @include accent-text;
+  font-size: $type-sm;
+  color: var(--text-secondary);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  margin-top: $space-4;
+  transition: color $transition-fast;
+
+  &::after {
+    content: ' →';
+    display: inline-block;
+    transition: transform $transition-fast;
+  }
+
+  &:hover {
+    color: var(--accent);
+    &::after { transform: translateX(4px); }
+  }
+}
+
+// Hero
+.hero {
+  @include section-padding;
+  background: var(--bg-secondary);
+  text-align: center;
+}
+
+.heroInner {
+  @include container;
+}
+
+.heroTitle {
+  @include heading;
+  font-size: $type-5xl;
+  margin-bottom: $space-3;
+
+  @include below($bp-md) {
+    font-size: $type-3xl;
+  }
+}
+
+.heroSub {
+  @include body;
+  font-size: $type-md;
+  color: var(--text-muted);
+}
+
+// Sections
+.section {
+  @include section-padding;
+}
+
+.sectionAlt {
+  @include section-padding;
+  background: var(--bg-secondary);
+}
+
+.sectionTitle {
+  @include heading;
+  font-size: $type-2xl;
+  margin-bottom: $space-6;
+}
+
+// Styles grid
+.stylesGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: $space-4;
+
+  @include below($bp-md) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.styleCard {
+  @include card-base;
+  padding: $space-5;
+  @include card-hover;
+}
+
+.styleCardAccent {
+  @include card-accent;
+  padding: $space-5;
+}
+
+.styleCardTitle {
+  @include heading;
+  font-size: $type-lg;
+  margin-bottom: $space-2;
+}
+
+.styleCardText {
+  @include body;
+  font-size: $type-sm;
+  color: var(--text-muted);
+}
+
+// Piercing
+.piercingCard {
+  @include card-accent;
+  padding: $space-5;
+  max-width: $max-width-narrow;
+}
+
+.piercingText {
+  @include body;
+  font-size: $type-base;
+  color: var(--text-secondary);
+}
+
+// Pricing
+.pricingCard {
+  @include card-ghost;
+  padding: $space-5;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+}
+
+.priceRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding-bottom: $space-2;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.priceLabel {
+  @include body;
+  font-size: $type-base;
+  color: var(--text-secondary);
+}
+
+.priceValue {
+  @include heading;
+  font-size: $type-lg;
+}
+
+.priceNote {
+  @include body;
+  font-size: $type-sm;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+// Steps
+.stepsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: $space-5;
+
+  @include below($bp-md) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @include below($bp-sm) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+}
+
+.stepNum {
+  @include heading;
+  font-size: $type-4xl;
+  color: var(--accent);
+  opacity: 0.5;
+  line-height: 1;
+}
+
+.stepTitle {
+  @include heading;
+  font-size: $type-lg;
+}
+
+.stepText {
+  @include body;
+  font-size: $type-sm;
+  color: var(--text-muted);
+}
+
+// CTA
+.cta {
+  @include section-padding;
+  text-align: center;
+}
+
+.ctaInner {
+  @include container;
+  max-width: $max-width-narrow;
+}
+
+.ctaHeading {
+  @include heading;
+  font-size: $type-3xl;
+  margin-bottom: $space-4;
+
+  @include below($bp-md) {
+    font-size: $type-2xl;
+  }
+}
+
+.ctaText {
+  @include body;
+  font-size: $type-md;
+  color: var(--text-secondary);
+  margin-bottom: $space-6;
+}
+
+.ctaBtn {
+  @include heading;
+  font-size: $type-sm;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  display: inline-block;
+  padding: $space-3 $space-7;
+  background: var(--accent);
+  color: var(--bg-primary);
+  transition: all $transition-fast;
+
+  &:hover {
+    background: var(--accent-hover);
+    transform: scale(1.02);
+  }
+}

@@ -1,0 +1,170 @@
+@use '@/styles/variables' as *;
+@use '@/styles/mixins' as *;
+@use '@/styles/typography' as *;
+
+// ===== HERO =====
+.hero {
+  @include section-padding;
+  background: var(--bg-primary);
+  text-align: center;
+}
+
+.heroInner {
+  @include container;
+  max-width: $max-width-narrow;
+}
+
+.heroHeading {
+  @include heading;
+  font-size: $type-4xl;
+  margin-bottom: $space-3;
+
+  @include below($bp-md) {
+    font-size: $type-3xl;
+  }
+}
+
+.heroIntro {
+  @include body;
+  font-size: $type-md;
+  color: var(--text-secondary);
+}
+
+// ===== FILTER BAR =====
+.filterBar {
+  position: sticky;
+  top: 0;
+  z-index: $z-sticky;
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border);
+  padding: $space-3 0;
+}
+
+.filterInner {
+  @include container;
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-2;
+  justify-content: center;
+}
+
+.filterPill {
+  @include body;
+  font-size: $type-sm;
+  padding: $space-2 $space-4;
+  border-radius: $radius-full;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  transition: all $transition-fast;
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--accent-border);
+    color: var(--text-primary);
+  }
+
+  &.active {
+    background: var(--accent);
+    color: var(--bg-primary);
+    border-color: var(--accent);
+  }
+}
+
+// ===== MASONRY GRID =====
+.gallerySection {
+  @include section-padding;
+  background: var(--bg-secondary);
+}
+
+.galleryInner {
+  @include container;
+}
+
+.masonryGrid {
+  column-count: 1;
+  column-gap: $space-4;
+
+  @include above($bp-md) {
+    column-count: 2;
+  }
+
+  @include above($bp-lg) {
+    column-count: 3;
+  }
+}
+
+.galleryItem {
+  break-inside: avoid;
+  margin-bottom: $space-4;
+  border-radius: $radius-md;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  position: relative;
+  transition: border-color $transition-fast, transform $transition-fast;
+
+  &:hover {
+    border-color: var(--accent-border);
+    transform: translateY(-2px);
+
+    .galleryOverlay {
+      opacity: 1;
+    }
+  }
+}
+
+.galleryImage {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.galleryOverlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: $space-3 $space-4;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+  opacity: 0;
+  transition: opacity $transition-fast;
+}
+
+.galleryStyle {
+  @include body;
+  font-size: $type-xs;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #fff;
+}
+
+.emptyState {
+  @include body;
+  font-size: $type-md;
+  color: var(--text-muted);
+  text-align: center;
+  padding: $space-9 0;
+}
+
+.count {
+  @include body;
+  font-size: $type-xs;
+  color: var(--text-muted);
+  margin-top: $space-7;
+  text-align: center;
+}
+
+.note {
+  @include body;
+  font-size: $type-xs;
+  color: var(--text-muted);
+  text-align: center;
+  margin-top: $space-3;
+
+  code {
+    background: var(--bg-surface);
+    padding: 0.1em 0.4em;
+    border-radius: $radius-sm;
+    font-size: 0.9em;
+  }
+}

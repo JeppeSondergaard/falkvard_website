@@ -1,0 +1,33 @@
+---
+description: Frontend styling and component rules — always reference the living styleguide
+globs: "**/*.tsx,**/*.scss"
+alwaysApply: false
+---
+
+# Falkvard Tattoo — Frontend Styleguide Reference
+
+When building any frontend page or component, **always reference the living styleguide** at `src/app/styleguide/page.tsx` and the design system files before writing markup or styles.
+
+## Design System Files
+
+- `src/styles/_variables.scss` — spacing, radii, breakpoints, z-index, transitions
+- `src/styles/_themes.scss` — CSS custom properties for dark/light (pure greyscale)
+- `src/styles/_typography.scss` — font stack, type scale, heading/body/label mixins
+- `src/styles/_mixins.scss` — container, section-padding, card variants, ornamental-frame, hover-lift, responsive helpers
+- `src/styles/globals.scss` — resets, global element styles
+
+## Rules
+
+1. **Import the design system** in every `.module.scss`:
+   ```scss
+   @use '@/styles/variables' as *;
+   @use '@/styles/mixins' as *;
+   @use '@/styles/typography' as *;
+   ```
+2. **Use CSS custom properties** for all colors (`var(--bg-primary)`, `var(--accent)`, etc.) — never hardcode hex values except in theme panels.
+3. **Use spacing variables** (`$space-1` through `$space-9`) — never raw pixel values.
+4. **Use type scale variables** (`$type-xs` through `$type-display`) and mixins (`@include heading`, `@include body`, `@include section-label`).
+5. **Use the `TentIcon` component** (`src/components/TentIcon.tsx`) for all tent logo instances. It accepts `size` and `variant` ("white" | "dark").
+6. **Both dark and light themes must work.** Test by toggling `data-theme` on `<html>`.
+7. **Responsive**: use `@include above($bp-lg)` and `@include below($bp-md)` mixins, never raw `@media`.
+8. **Card variety**: alternate between `card-base`, `card-accent`, `card-ghost`, and dark card patterns. Never repeat the same card style consecutively.

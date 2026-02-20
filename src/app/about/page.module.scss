@@ -1,0 +1,233 @@
+@use '@/styles/variables' as *;
+@use '@/styles/mixins' as *;
+@use '@/styles/typography' as *;
+
+// Shared
+.sectionLabel {
+  @include section-label;
+  margin-bottom: $space-2;
+}
+
+// ===== HERO =====
+.hero {
+  @include section-padding;
+  background: var(--bg-primary);
+  text-align: center;
+}
+
+.heroInner {
+  @include container;
+  max-width: $max-width-narrow;
+}
+
+.heroHeading {
+  @include heading;
+  font-size: $type-4xl;
+  margin-bottom: $space-4;
+
+  @include below($bp-md) {
+    font-size: $type-3xl;
+  }
+}
+
+.heroIntro {
+  @include body;
+  font-size: $type-md;
+  color: var(--text-secondary);
+}
+
+// ===== ARTIST STORY =====
+.artistStory {
+  @include section-padding;
+  background: var(--bg-secondary);
+}
+
+.artistStoryInner {
+  @include container;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $space-8;
+  align-items: center;
+
+  @include below($bp-md) {
+    grid-template-columns: 1fr;
+    gap: $space-6;
+  }
+}
+
+.artistImagePlaceholder {
+  aspect-ratio: 3 / 4;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: $radius-md;
+}
+
+.artistStoryContent {
+  display: flex;
+  flex-direction: column;
+  gap: $space-4;
+}
+
+.artistStoryHeading {
+  @include heading;
+  font-size: $type-2xl;
+  margin-bottom: $space-2;
+
+  @include below($bp-md) {
+    font-size: $type-xl;
+  }
+}
+
+.artistStoryText {
+  @include body;
+  font-size: $type-md;
+  color: var(--text-secondary);
+}
+
+// ===== PHILOSOPHY =====
+.philosophy {
+  @include section-padding;
+  background: var(--bg-primary);
+}
+
+.philosophyInner {
+  @include container;
+}
+
+.quoteBlock {
+  @include ornamental-frame;
+  max-width: $max-width-narrow;
+  margin: 0 auto $space-8;
+  text-align: center;
+  padding: $space-6;
+}
+
+.quoteText {
+  @include heading;
+  font-size: $type-2xl;
+  font-style: italic;
+
+  @include below($bp-md) {
+    font-size: $type-xl;
+  }
+}
+
+.valuesGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: $space-5;
+
+  @include below($bp-md) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.valueItem {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+}
+
+.valueTitle {
+  @include heading;
+  font-size: $type-lg;
+  color: var(--accent);
+}
+
+.valueDesc {
+  @include body;
+  font-size: $type-sm;
+  color: var(--text-muted);
+}
+
+// ===== PRIVATE STUDIO =====
+.privateStudio {
+  @include section-padding;
+  background: var(--bg-primary);
+}
+
+.privateStudioInner {
+  @include container;
+}
+
+.privateStudioHeading {
+  @include heading;
+  font-size: $type-2xl;
+  margin-bottom: $space-6;
+  color: var(--text-primary);
+
+  @include below($bp-md) {
+    font-size: $type-xl;
+  }
+}
+
+.benefitsList {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: $space-5 $space-8;
+
+  @include below($bp-md) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.benefitItem {
+  display: flex;
+  align-items: flex-start;
+  gap: $space-4;
+}
+
+.benefitNum {
+  @include heading;
+  font-size: $type-4xl;
+  color: var(--accent);
+  opacity: 0.6;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.benefitText {
+  @include body;
+  font-size: $type-md;
+  color: var(--text-secondary);
+}
+
+// ===== CTA =====
+.cta {
+  @include section-padding;
+  background: var(--bg-primary);
+  text-align: center;
+}
+
+.ctaInner {
+  @include container;
+  max-width: $max-width-narrow;
+}
+
+.ctaHeading {
+  @include heading;
+  font-size: $type-3xl;
+  margin-bottom: $space-4;
+
+  @include below($bp-md) {
+    font-size: $type-2xl;
+  }
+}
+
+.ctaBtn {
+  @include heading;
+  font-size: $type-sm;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  display: inline-block;
+  padding: $space-3 $space-7;
+  background: var(--accent);
+  color: var(--bg-primary);
+  transition: all $transition-fast;
+
+  &:hover {
+    background: var(--accent-hover);
+    transform: scale(1.02);
+  }
+}

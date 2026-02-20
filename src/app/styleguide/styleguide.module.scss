@@ -1,0 +1,785 @@
+@use '@/styles/variables' as *;
+@use '@/styles/mixins' as *;
+@use '@/styles/typography' as *;
+
+.page {
+  min-height: 100vh;
+  padding-bottom: $space-9;
+}
+
+// Header
+.header {
+  position: sticky;
+  top: 0;
+  z-index: $z-sticky;
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border);
+  padding: $space-3 0;
+}
+
+.headerInner {
+  @include container;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  @include heading;
+  font-size: $type-lg;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+}
+
+.themeToggle {
+  display: flex;
+  gap: $space-2;
+  align-items: center;
+  font-size: $type-sm;
+  color: var(--text-muted);
+
+  button {
+    padding: $space-1 $space-3;
+    border-radius: $radius-full;
+    font-size: $type-xs;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    transition: all $transition-fast;
+    color: var(--text-muted);
+
+    &.active {
+      background: var(--accent);
+      color: var(--bg-primary);
+    }
+  }
+}
+
+// Section wrapper
+.section {
+  @include container;
+  @include section-padding;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.sectionLabel {
+  @include section-label;
+  margin-bottom: $space-2;
+}
+
+.sectionTitle {
+  @include heading;
+  font-size: $type-2xl;
+  margin-bottom: $space-6;
+}
+
+.sectionDescription {
+  @include body;
+  font-size: $type-sm;
+  color: var(--text-muted);
+  margin-bottom: $space-6;
+  max-width: 600px;
+}
+
+// Logo section
+.logoGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: $space-5;
+}
+
+.logoCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: $space-6;
+  border: 1px solid var(--border);
+  border-radius: $radius-md;
+  min-height: 240px;
+}
+
+.logoCardDark {
+  background: #0A0A0A;
+}
+
+.logoCardLight {
+  background: #F5F5F5;
+}
+
+.logoCardTransparent {
+  background: repeating-conic-gradient(
+    var(--bg-surface) 0% 25%,
+    var(--bg-secondary) 0% 50%
+  ) 50% / 20px 20px;
+}
+
+.logoCardLabel {
+  font-size: $type-xs;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--text-muted);
+  margin-top: $space-3;
+  font-weight: 700;
+}
+
+.logoFullSvg {
+  max-width: 200px;
+  height: auto;
+}
+
+.tentIconDemo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-6;
+  align-items: center;
+  justify-content: center;
+}
+
+.tentSizeLabel {
+  font-size: $type-xs;
+  color: var(--text-muted);
+  text-align: center;
+  margin-top: $space-1;
+}
+
+.tentDesignElements {
+  display: flex;
+  flex-direction: column;
+  gap: $space-6;
+  align-items: center;
+}
+
+.tentDivider {
+  display: flex;
+  align-items: center;
+  gap: $space-4;
+  width: 100%;
+  max-width: 600px;
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--ornamental);
+    opacity: 0.3;
+  }
+}
+
+.tentWatermark {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  padding: $space-6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed var(--border);
+  border-radius: $radius-md;
+  min-height: 200px;
+}
+
+.tentWatermarkIcon {
+  position: absolute;
+  opacity: 0.04;
+  pointer-events: none;
+}
+
+.tentWatermarkText {
+  position: relative;
+  @include heading;
+  font-size: $type-xl;
+  text-align: center;
+}
+
+.tentCorner {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  padding: $space-6;
+  border: 1px solid var(--border);
+  border-radius: $radius-md;
+  text-align: center;
+}
+
+.tentCornerIcon {
+  position: absolute;
+  opacity: 0.15;
+
+  &:nth-child(1) { top: $space-3; left: $space-3; }
+  &:nth-child(2) { top: $space-3; right: $space-3; transform: scaleX(-1); }
+  &:nth-child(3) { bottom: $space-3; left: $space-3; transform: scaleY(-1); }
+  &:nth-child(4) { bottom: $space-3; right: $space-3; transform: scale(-1); }
+}
+
+.faviconGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-4;
+  align-items: end;
+}
+
+.faviconItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $space-2;
+
+  img {
+    border-radius: $radius-sm;
+    border: 1px solid var(--border);
+  }
+}
+
+.faviconLabel {
+  font-size: $type-xs;
+  color: var(--text-muted);
+}
+
+// Color swatches
+.colorGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: $space-3;
+}
+
+.colorSwatch {
+  border-radius: $radius-md;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.swatchColor {
+  height: 80px;
+  width: 100%;
+}
+
+.swatchInfo {
+  padding: $space-2 $space-3;
+  background: var(--bg-elevated);
+
+  .swatchName {
+    font-size: $type-xs;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+  }
+
+  .swatchValue {
+    @include accent-text;
+    font-size: $type-xs;
+    color: var(--text-muted);
+  }
+}
+
+// Typography samples
+.typeStack {
+  display: flex;
+  flex-direction: column;
+  gap: $space-5;
+}
+
+.typeSample {
+  display: flex;
+  flex-direction: column;
+  gap: $space-1;
+  padding-bottom: $space-5;
+  border-bottom: 1px solid var(--border-subtle);
+
+  .typeLabel {
+    @include section-label;
+    font-size: 10px;
+  }
+
+  .typeDemo {
+    color: var(--text-primary);
+  }
+
+  .typeMeta {
+    @include accent-text;
+    font-size: $type-xs;
+    color: var(--text-muted);
+  }
+}
+
+// Buttons
+.buttonRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-3;
+  align-items: center;
+}
+
+.buttonGroup {
+  display: flex;
+  flex-direction: column;
+  gap: $space-4;
+}
+
+// Button styles
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border-radius: $radius-sm;
+  transition: all $transition-base;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btnSm {
+  font-size: $type-xs;
+  padding: $space-2 $space-3;
+}
+
+.btnMd {
+  font-size: $type-sm;
+  padding: $space-2 $space-5;
+  height: 44px;
+}
+
+.btnLg {
+  font-size: $type-sm;
+  padding: $space-3 $space-6;
+  height: 52px;
+}
+
+.btnPrimary {
+  background: var(--accent);
+  color: var(--bg-primary);
+
+  &:hover {
+    background: var(--accent-hover);
+    transform: scale(1.02);
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+  }
+}
+
+.btnSecondary {
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+
+  &:hover {
+    background: var(--accent-subtle);
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.btnGhost {
+  background: transparent;
+  color: var(--text-secondary);
+  padding-left: 0;
+  padding-right: 0;
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 400;
+
+  &:hover {
+    color: var(--accent);
+  }
+
+  &::after {
+    content: ' →';
+    transition: transform $transition-fast;
+    display: inline-block;
+  }
+
+  &:hover::after {
+    transform: translateX(4px);
+  }
+}
+
+// Cards
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: $space-4;
+}
+
+.card {
+  @include card-base;
+  padding: $space-5;
+  @include card-hover;
+}
+
+.cardAccent {
+  @include card-accent;
+  padding: $space-5;
+}
+
+.cardDark {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: $radius-md;
+  padding: $space-5;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--border-subtle) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border-subtle) 1px, transparent 1px);
+    background-size: 24px 24px;
+    opacity: 0.3;
+    pointer-events: none;
+  }
+}
+
+.cardGhost {
+  @include card-ghost;
+  padding: $space-5;
+}
+
+.cardTitle {
+  @include heading;
+  font-size: $type-lg;
+  margin-bottom: $space-2;
+}
+
+.cardText {
+  @include body;
+  font-size: $type-sm;
+  color: var(--text-muted);
+}
+
+// Ornamental frame
+.ornamentalFrame {
+  @include ornamental-frame;
+  max-width: 500px;
+}
+
+.ornamentalDivider {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+  color: var(--ornamental);
+  margin: $space-5 0;
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--ornamental);
+    opacity: 0.3;
+  }
+
+  span {
+    font-size: $type-xs;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+  }
+}
+
+// Section label component
+.sectionLabelDemo {
+  @include section-label;
+  margin-bottom: $space-2;
+}
+
+.sectionLabelHeading {
+  @include heading;
+  font-size: $type-2xl;
+}
+
+// Pull quote
+.pullQuote {
+  @include ornamental-frame;
+  max-width: 700px;
+  text-align: center;
+  margin: 0 auto;
+
+  .pullQuoteText {
+    @include heading;
+    font-size: $type-2xl;
+    font-style: italic;
+    color: var(--text-primary);
+    margin-bottom: $space-3;
+  }
+
+  .pullQuoteAuthor {
+    @include accent-text;
+    font-size: $type-sm;
+    color: var(--ornamental);
+  }
+}
+
+// Numbered steps
+.stepsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: $space-5;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+}
+
+.stepNumber {
+  @include heading;
+  font-size: $type-4xl;
+  color: var(--accent);
+  opacity: 0.6;
+  line-height: 1;
+}
+
+.stepTitle {
+  @include heading;
+  font-size: $type-lg;
+}
+
+.stepText {
+  @include body;
+  font-size: $type-sm;
+  color: var(--text-muted);
+}
+
+// Form elements
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $space-4;
+  max-width: 700px;
+
+  @include below($bp-md) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: $space-1;
+
+  &.fullWidth {
+    grid-column: 1 / -1;
+  }
+}
+
+.formLabel {
+  @include section-label;
+  font-size: 10px;
+}
+
+.formInput {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: $radius-sm;
+  padding: $space-2 $space-3;
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: $type-base;
+  font-weight: 300;
+  color: var(--text-primary);
+  transition: border-color $transition-fast;
+  height: 44px;
+
+  &::placeholder {
+    color: var(--text-muted);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+}
+
+.formTextarea {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: $radius-sm;
+  padding: $space-2 $space-3;
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: $type-base;
+  font-weight: 300;
+  color: var(--text-primary);
+  transition: border-color $transition-fast;
+  width: 100%;
+  height: auto;
+  min-height: 120px;
+  resize: vertical;
+
+  &::placeholder { color: var(--text-muted); }
+  &:focus { outline: none; border-color: var(--accent); }
+}
+
+.formSelect {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: $radius-sm;
+  padding: $space-2 $space-3;
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: $type-base;
+  font-weight: 300;
+  color: var(--text-primary);
+  transition: border-color $transition-fast;
+  height: 44px;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M6 8L1 3h10z' fill='%236B6560'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: $space-6;
+
+  &:focus { outline: none; border-color: var(--accent); }
+}
+
+// Decorative display text
+.displayText {
+  @include decorative-display;
+  font-size: $type-display;
+  text-align: center;
+  padding: $space-6 0;
+  user-select: none;
+
+  @include below($bp-md) {
+    font-size: $type-5xl;
+  }
+}
+
+// Scroll reveal demo
+.revealDemo {
+  display: flex;
+  flex-direction: column;
+  gap: $space-4;
+  align-items: center;
+}
+
+.revealBox {
+  width: 100%;
+  max-width: 500px;
+  padding: $space-5;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: $radius-md;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: revealIn 0.6s ease forwards;
+
+  &:nth-child(2) { animation-delay: 0.15s; }
+  &:nth-child(3) { animation-delay: 0.3s; }
+}
+
+@keyframes revealIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Two column layout for theme comparison
+.themeCompare {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $space-4;
+
+  @include below($bp-md) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.themePanel {
+  padding: $space-5;
+  border-radius: $radius-md;
+  border: 1px solid var(--border);
+}
+
+.themePanelDark {
+  background: #0A0A0A;
+  color: #FFFFFF;
+}
+
+.themePanelLight {
+  background: #F5F5F5;
+  color: #0A0A0A;
+}
+
+.themePanelLabel {
+  font-size: $type-xs;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: #CCCCCC;
+  margin-bottom: $space-2;
+  font-weight: 700;
+}
+
+.themePanelLabelLight {
+  font-size: $type-xs;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: #333333;
+  margin-bottom: $space-2;
+  font-weight: 700;
+}
+
+.themePanelTitle {
+  font-size: $type-xl;
+  margin-bottom: $space-3;
+  color: #FFFFFF;
+  font-weight: 700;
+}
+
+.themePanelTitleLight {
+  font-size: $type-xl;
+  margin-bottom: $space-3;
+  color: #0A0A0A;
+  font-weight: 700;
+}
+
+.themePanelBody {
+  font-size: $type-sm;
+  color: #A0A0A0;
+  line-height: 1.65;
+}
+
+.themePanelBodyLight {
+  font-size: $type-sm;
+  color: #555555;
+  line-height: 1.65;
+}
+
+.themePanelBtn {
+  margin-top: $space-3;
+  background: #CCCCCC;
+  color: #0A0A0A;
+  padding: $space-2 $space-4;
+  border-radius: $radius-sm;
+  font-size: $type-xs;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.themePanelBtnLight {
+  margin-top: $space-3;
+  background: #333333;
+  color: #F5F5F5;
+  padding: $space-2 $space-4;
+  border-radius: $radius-sm;
+  font-size: $type-xs;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}

@@ -1,0 +1,258 @@
+@use '@/styles/variables' as *;
+@use '@/styles/mixins' as *;
+@use '@/styles/typography' as *;
+
+// ===== WRAPPER =====
+.section {
+  @include section-padding;
+  background: var(--bg-secondary);
+}
+
+.inner {
+  @include container;
+  max-width: $max-width-narrow;
+}
+
+.formCard {
+  @include card-base;
+  padding: $space-6;
+}
+
+// ===== PROGRESS =====
+.progress {
+  display: flex;
+  justify-content: center;
+  gap: $space-2;
+  margin-bottom: $space-6;
+}
+
+.progressStep {
+  width: 12px;
+  height: 12px;
+  border-radius: $radius-full;
+  background: var(--border);
+  transition: background $transition-fast;
+
+  &.active {
+    background: var(--accent);
+    box-shadow: 0 0 0 2px var(--bg-elevated);
+  }
+
+  &.done {
+    background: var(--text-muted);
+  }
+}
+
+// ===== STEP 1 — SERVICE CARDS =====
+.serviceGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: $space-4;
+
+  @include below($bp-md) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.serviceCard {
+  @include card-base;
+  padding: $space-5;
+  cursor: pointer;
+  text-align: center;
+  border: 2px solid transparent;
+  transition: border-color $transition-fast, box-shadow $transition-base;
+
+  &:hover {
+    border-color: var(--accent-border);
+  }
+
+  &.selected {
+    border: 2px solid var(--accent);
+  }
+}
+
+.serviceTitle {
+  @include heading;
+  font-size: $type-lg;
+  margin-bottom: $space-2;
+  color: var(--text-primary);
+}
+
+.serviceDesc {
+  @include body;
+  font-size: $type-sm;
+  color: var(--text-muted);
+}
+
+// ===== FORM FIELDS (STEPS 2 & 3) =====
+.fieldGroup {
+  margin-bottom: $space-4;
+}
+
+.label {
+  @include section-label;
+  display: block;
+  margin-bottom: $space-1;
+}
+
+.input,
+.select,
+.textarea {
+  width: 100%;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: $radius-sm;
+  padding: $space-2 $space-3;
+  font-family: $font-stack;
+  font-size: $type-base;
+  color: var(--text-primary);
+  transition: border-color $transition-fast;
+
+  &:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+
+  &::placeholder {
+    color: var(--text-muted);
+  }
+}
+
+.textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='%23A0A0A0'%3E%3Cpath d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right $space-3 center;
+  padding-right: $space-7;
+}
+
+// ===== FILE UPLOAD DROP ZONE =====
+.fileZone {
+  border: 2px dashed var(--border);
+  border-radius: $radius-md;
+  padding: $space-6;
+  text-align: center;
+  background: var(--bg-secondary);
+  cursor: pointer;
+  transition: border-color $transition-fast, background $transition-fast;
+
+  &:hover,
+  &.dragover {
+    border-color: var(--accent);
+    background: var(--accent-subtle);
+  }
+}
+
+.fileZoneText {
+  @include body;
+  font-size: $type-sm;
+  color: var(--text-muted);
+}
+
+.fileInput {
+  @include sr-only;
+}
+
+// ===== CONFIRMATION (STEP 4) =====
+.summaryCard {
+  @include card-base;
+  padding: $space-5;
+  margin-bottom: $space-5;
+}
+
+.summaryTitle {
+  @include section-label;
+  margin-bottom: $space-4;
+}
+
+.summaryRow {
+  @include body;
+  font-size: $type-sm;
+  color: var(--text-secondary);
+  margin-bottom: $space-2;
+
+  strong {
+    color: var(--text-primary);
+    margin-right: $space-2;
+  }
+}
+
+.confirmNote {
+  @include body;
+  font-size: $type-sm;
+  color: var(--text-muted);
+  margin-bottom: $space-5;
+}
+
+.submitBtn {
+  @include heading;
+  font-size: $type-sm;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: $space-3 $space-5;
+  background: var(--accent);
+  color: var(--bg-primary);
+  border: none;
+  border-radius: $radius-sm;
+  cursor: pointer;
+  transition: background $transition-fast, transform $transition-fast;
+
+  &:hover {
+    background: var(--accent-hover);
+    transform: scale(1.02);
+  }
+}
+
+// ===== NAV BUTTONS =====
+.navRow {
+  display: flex;
+  justify-content: space-between;
+  gap: $space-4;
+  margin-top: $space-6;
+  padding-top: $space-4;
+  border-top: 1px solid var(--border);
+}
+
+.navBtn {
+  @include heading;
+  font-size: $type-sm;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: $space-2 $space-4;
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: $radius-sm;
+  cursor: pointer;
+  transition: background $transition-fast, color $transition-fast;
+
+  &:hover {
+    background: var(--accent-subtle);
+    color: var(--accent-hover);
+  }
+}
+
+.navBtnPrimary {
+  background: var(--accent);
+  color: var(--bg-primary);
+  border-color: var(--accent);
+
+  &:hover {
+    background: var(--accent-hover);
+    color: var(--bg-primary);
+  }
+}
+
+.pageTitle {
+  @include heading;
+  font-size: $type-2xl;
+  margin-bottom: $space-6;
+  text-align: center;
+  color: var(--text-primary);
+}

@@ -1,0 +1,63 @@
+// ============================================
+// Falkvard Tattoo -- Typography
+// ============================================
+// Single font: CourierNewPMST (typewriter monospace)
+// Loaded as local font via @font-face in globals.scss
+// Fallback: 'Courier New', Courier, monospace
+
+$type-xs: 0.75rem;    // 12px
+$type-sm: 0.875rem;   // 14px
+$type-base: 1rem;     // 16px
+$type-md: 1.125rem;   // 18px
+$type-lg: 1.25rem;    // 20px
+$type-xl: 1.5rem;     // 24px
+$type-2xl: 2rem;      // 32px
+$type-3xl: 2.5rem;    // 40px
+$type-4xl: 3rem;      // 48px
+$type-5xl: 3.75rem;   // 60px
+$type-6xl: 4.5rem;    // 72px
+$type-display: 6rem;  // 96px
+
+$font-stack: 'CourierNewPMST', 'Courier New', Courier, monospace;
+
+@mixin heading {
+  font-family: $font-stack;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: 0.02em;
+  color: var(--text-primary);
+}
+
+@mixin body {
+  font-family: $font-stack;
+  font-weight: 400;
+  line-height: 1.65;
+  color: var(--text-secondary);
+}
+
+@mixin accent-text {
+  font-family: $font-stack;
+  font-weight: 400;
+  line-height: 1.4;
+  letter-spacing: 0.03em;
+}
+
+@mixin section-label {
+  font-family: $font-stack;
+  font-size: $type-xs;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--accent);
+}
+
+@mixin decorative-display {
+  font-family: $font-stack;
+  font-weight: 700;
+  line-height: 1.0;
+  letter-spacing: 0.05em;
+  color: var(--ornamental);
+  opacity: 0.12;
+}
+
+// Global element styles are in globals.scss

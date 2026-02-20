@@ -1,0 +1,112 @@
+@use 'themes';
+@use 'typography' as t;
+@use 'variables' as *;
+
+// CourierNewPMST -- falls back to Courier New which is universally available
+// If you have the actual CourierNewPMST font files, place them in public/fonts/
+// and uncomment the @font-face below:
+//
+// @font-face {
+//   font-family: 'CourierNewPMST';
+//   src: url('/fonts/CourierNewPMST.woff2') format('woff2'),
+//        url('/fonts/CourierNewPMST.woff') format('woff');
+//   font-weight: 400;
+//   font-style: normal;
+//   font-display: swap;
+// }
+//
+// @font-face {
+//   font-family: 'CourierNewPMST';
+//   src: url('/fonts/CourierNewPMST-Bold.woff2') format('woff2'),
+//        url('/fonts/CourierNewPMST-Bold.woff') format('woff');
+//   font-weight: 700;
+//   font-style: normal;
+//   font-display: swap;
+// }
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background: var(--bg-primary);
+  color: var(--text-secondary);
+  font-family: t.$font-stack;
+  font-weight: 400;
+  line-height: 1.65;
+  min-height: 100vh;
+  transition: background-color $transition-slow, color $transition-slow;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+  transition: color $transition-fast;
+
+  &:hover {
+    color: var(--accent-hover);
+  }
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  font: inherit;
+  color: inherit;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--bg-primary);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: $radius-full;
+
+  &:hover {
+    background: var(--ornamental);
+  }
+}
+
+h1 { @include t.heading; font-size: t.$type-5xl; }
+h2 { @include t.heading; font-size: t.$type-3xl; }
+h3 { @include t.heading; font-size: t.$type-2xl; }
+h4 { @include t.heading; font-size: t.$type-xl; }
+h5 { @include t.heading; font-size: t.$type-lg; }
+h6 { @include t.heading; font-size: t.$type-md; }
+
+p { @include t.body; font-size: t.$type-base; }
+small { @include t.body; font-size: t.$type-sm; }
+
+@media (max-width: 768px) {
+  h1 { font-size: t.$type-3xl; }
+  h2 { font-size: t.$type-2xl; }
+  h3 { font-size: t.$type-xl; }
+}

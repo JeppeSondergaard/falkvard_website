@@ -1,0 +1,193 @@
+@use '@/styles/variables' as *;
+@use '@/styles/mixins' as *;
+@use '@/styles/typography' as *;
+
+// ===== HERO =====
+.hero {
+  @include section-padding;
+  background: var(--bg-primary);
+  text-align: center;
+}
+
+.heroInner {
+  @include container;
+  max-width: $max-width-narrow;
+}
+
+.heroHeading {
+  @include heading;
+  font-size: $type-4xl;
+  margin-bottom: $space-4;
+
+  @include below($bp-md) {
+    font-size: $type-3xl;
+  }
+}
+
+.heroIntro {
+  @include body;
+  font-size: $type-md;
+  color: var(--text-secondary);
+}
+
+// ===== TWO-COLUMN LAYOUT =====
+.contactSection {
+  @include section-padding;
+  background: var(--bg-secondary);
+}
+
+.contactInner {
+  @include container;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $space-8;
+  align-items: start;
+
+  @include below($bp-md) {
+    grid-template-columns: 1fr;
+    gap: $space-6;
+  }
+}
+
+// ===== FORM =====
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: $space-4;
+}
+
+.label {
+  @include section-label;
+  display: block;
+  margin-bottom: $space-1;
+}
+
+.input,
+.select,
+.textarea {
+  width: 100%;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: $radius-sm;
+  padding: $space-2 $space-3;
+  font-family: $font-stack;
+  font-size: $type-base;
+  color: var(--text-primary);
+  transition: border-color $transition-fast;
+
+  &:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+
+  &::placeholder {
+    color: var(--text-muted);
+  }
+}
+
+.textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='%23A0A0A0'%3E%3Cpath d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right $space-3 center;
+  padding-right: $space-7;
+}
+
+.submitBtn {
+  @include heading;
+  font-size: $type-sm;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: $space-3 $space-5;
+  background: var(--accent);
+  color: var(--bg-primary);
+  border: none;
+  border-radius: $radius-sm;
+  cursor: pointer;
+  transition: background $transition-fast, transform $transition-fast;
+  margin-top: $space-2;
+
+  &:hover {
+    background: var(--accent-hover);
+    transform: scale(1.02);
+  }
+}
+
+// ===== INFO CARDS =====
+.infoCards {
+  display: flex;
+  flex-direction: column;
+  gap: $space-4;
+}
+
+.addressCard {
+  @include card-accent;
+  padding: $space-4;
+}
+
+.hoursCard {
+  @include card-base;
+  padding: $space-4;
+}
+
+.socialCard {
+  @include card-ghost;
+  padding: $space-4;
+}
+
+.cardLabel {
+  @include section-label;
+  margin-bottom: $space-2;
+}
+
+.cardContent {
+  @include body;
+  font-size: $type-md;
+  color: var(--text-secondary);
+}
+
+.cardSub {
+  @include body;
+  font-size: $type-sm;
+  color: var(--text-muted);
+  margin-top: $space-1;
+}
+
+.socialLink {
+  @include body;
+  font-size: $type-md;
+  color: var(--accent);
+  text-decoration: none;
+  transition: color $transition-fast;
+
+  &:hover {
+    color: var(--accent-hover);
+  }
+}
+
+// ===== MAP PLACEHOLDER =====
+.mapSection {
+  width: 100%;
+}
+
+.mapPlaceholder {
+  width: 100%;
+  height: 400px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mapPlaceholderText {
+  @include body;
+  font-size: $type-lg;
+  color: var(--text-muted);
+}

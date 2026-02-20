@@ -1,0 +1,118 @@
+@use 'variables' as *;
+
+// Responsive breakpoints
+@mixin above($bp) {
+  @media (min-width: $bp) { @content; }
+}
+
+@mixin below($bp) {
+  @media (max-width: ($bp - 1px)) { @content; }
+}
+
+// Container
+@mixin container($max: $max-width-content) {
+  max-width: $max;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: $space-4;
+  padding-right: $space-4;
+
+  @include above($bp-lg) {
+    padding-left: $space-6;
+    padding-right: $space-6;
+  }
+}
+
+// Section spacing
+@mixin section-padding {
+  padding-top: $space-8;
+  padding-bottom: $space-8;
+
+  @include below($bp-md) {
+    padding-top: $space-7;
+    padding-bottom: $space-7;
+  }
+}
+
+// Card base
+@mixin card-base {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: $radius-md;
+  transition: border-color $transition-base, box-shadow $transition-base, transform $transition-base;
+}
+
+@mixin card-hover {
+  &:hover {
+    border-color: var(--accent-border);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+}
+
+// Accent left border card
+@mixin card-accent {
+  @include card-base;
+  border-left: 3px solid var(--accent);
+  border-top: none;
+  border-right: none;
+  border-bottom: none;
+  border-radius: 0 $radius-md $radius-md 0;
+}
+
+// Ghost card
+@mixin card-ghost {
+  background: transparent;
+  border: 1px dashed var(--border);
+  border-radius: $radius-md;
+}
+
+// Ornamental border frame
+@mixin ornamental-frame {
+  position: relative;
+  padding: $space-6;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    border-color: var(--ornamental);
+    border-style: solid;
+  }
+
+  &::before {
+    top: 0;
+    left: 0;
+    border-width: 1px 0 0 1px;
+  }
+
+  &::after {
+    bottom: 0;
+    right: 0;
+    border-width: 0 1px 1px 0;
+  }
+}
+
+// Hover lift
+@mixin hover-lift($amount: -2px) {
+  transition: transform $transition-base, box-shadow $transition-base;
+  &:hover {
+    transform: translateY($amount);
+    box-shadow: var(--shadow-md);
+  }
+}
+
+// Visually hidden
+@mixin sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

@@ -1,0 +1,319 @@
+@use '@/styles/variables' as *;
+@use '@/styles/typography' as t;
+@use '@/styles/mixins' as m;
+
+.introContainer {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--bg-primary);
+  z-index: 9999;
+}
+
+// ── Background video — slow fade across the whole intro ──
+
+.videoBg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 5s cubic-bezier(0.4, 0, 0.2, 1);
+
+  video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: grayscale(0.6) brightness(0.6);
+  }
+
+  &.videoBgVisible {
+    opacity: 0.2;
+  }
+}
+
+// ── SVG logo animation ──────────────────────────────
+
+.logoWrapper {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 8vh;
+  pointer-events: none;
+}
+
+.logoSvg {
+  width: auto;
+  height: 38vh;
+  max-height: 340px;
+
+  @include m.below($bp-sm) {
+    height: 30vh;
+  }
+}
+
+.smokeGroup {
+  transition: opacity 2s ease;
+}
+
+// ── SVG path draw animation (CSS only, runs once) ───
+
+@keyframes draw-path {
+  from {
+    stroke-dashoffset: 1;
+    opacity: 0.2;
+  }
+  to {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+.pathHidden {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  opacity: 0;
+}
+
+.pathDraw {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+  opacity: 1;
+  animation: draw-path 900ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+// ── Wiggle keyframes ────────────────────────────────
+
+@keyframes wiggle-a {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  20% { transform: translate(0.6px, -0.4px) rotate(0.15deg); }
+  50% { transform: translate(-0.5px, 0.5px) rotate(-0.12deg); }
+  80% { transform: translate(0.3px, 0.2px) rotate(0.08deg); }
+}
+
+@keyframes wiggle-b {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(-0.5px, 0.6px) rotate(-0.18deg); }
+  55% { transform: translate(0.4px, -0.3px) rotate(0.1deg); }
+  85% { transform: translate(-0.2px, 0.3px) rotate(-0.06deg); }
+}
+
+@keyframes wiggle-c {
+  0%, 100% { transform: translate(0, 0); }
+  30% { transform: translate(0.4px, 0.3px); }
+  60% { transform: translate(-0.3px, -0.4px); }
+}
+
+@mixin wiggle-path {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.wiggle0 { @include wiggle-path; animation: wiggle-a 4.0s ease-in-out infinite; }
+.wiggle1 { @include wiggle-path; animation: wiggle-b 4.5s ease-in-out infinite 0.3s; }
+.wiggle2 { @include wiggle-path; animation: wiggle-c 3.8s ease-in-out infinite 0.6s; }
+.wiggle3 { @include wiggle-path; animation: wiggle-a 5.0s ease-in-out infinite 0.15s; }
+.wiggle4 { @include wiggle-path; animation: wiggle-b 3.6s ease-in-out infinite 0.45s; }
+.wiggle5 { @include wiggle-path; animation: wiggle-c 4.2s ease-in-out infinite 0.7s; }
+
+// ── Vignette ────────────────────────────────────────
+
+.vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 25%,
+    rgba(0, 0, 0, 0.55) 100%
+  );
+}
+
+// ── Fade-to-dark overlay ────────────────────────────
+
+.fadeOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background: var(--bg-primary);
+  opacity: 0;
+  transition: opacity 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &.fadeDarkActive {
+    opacity: 1;
+  }
+}
+
+// ── Text overlay — every child is absolutely positioned ──
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.titleWrap {
+  position: absolute;
+  top: 14%;
+  left: 0;
+  right: 0;
+  text-align: center;
+
+  @include m.below($bp-sm) {
+    top: 12%;
+  }
+}
+
+.subtitleWrap {
+  position: absolute;
+  top: 62%;
+  left: 0;
+  right: 0;
+  text-align: center;
+
+  @include m.below($bp-sm) {
+    top: 60%;
+  }
+}
+
+.ctaWrap {
+  position: absolute;
+  bottom: 16%;
+  left: 0;
+  right: 0;
+  text-align: center;
+  pointer-events: all;
+
+  @include m.below($bp-sm) {
+    bottom: 12%;
+  }
+}
+
+.title {
+  font-family: t.$font-stack;
+  font-weight: 700;
+  font-size: t.$type-display;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--text-primary);
+  line-height: 1;
+  overflow: hidden;
+  text-indent: 0.35em;
+
+  @include m.below($bp-md) {
+    font-size: t.$type-4xl;
+    letter-spacing: 0.25em;
+    text-indent: 0.25em;
+  }
+
+  @include m.below($bp-sm) {
+    font-size: t.$type-3xl;
+    letter-spacing: 0.2em;
+    text-indent: 0.2em;
+  }
+}
+
+.titleLetter {
+  display: inline-block;
+}
+
+.subtitle {
+  font-family: t.$font-stack;
+  font-weight: 400;
+  font-size: t.$type-xl;
+  color: var(--text-primary);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  text-indent: 0.3em;
+
+  @include m.below($bp-md) {
+    font-size: t.$type-lg;
+    letter-spacing: 0.2em;
+    text-indent: 0.2em;
+  }
+
+  @include m.below($bp-sm) {
+    font-size: t.$type-base;
+    letter-spacing: 0.15em;
+    text-indent: 0.15em;
+  }
+}
+
+// ── Controls ────────────────────────────────────────
+
+.skipButton {
+  position: absolute;
+  bottom: $space-6;
+  right: $space-6;
+  z-index: 10;
+  pointer-events: all;
+  font-family: t.$font-stack;
+  font-size: t.$type-xs;
+  font-weight: 400;
+  color: var(--text-muted);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  padding: $space-2 $space-3;
+  cursor: pointer;
+  transition: color $transition-base, border-color $transition-base;
+
+  &:hover {
+    color: var(--text-primary);
+    border-color: var(--accent);
+  }
+}
+
+.enterButton {
+  pointer-events: all;
+  font-family: t.$font-stack;
+  font-weight: 700;
+  font-size: t.$type-lg;
+  color: var(--text-primary);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  background: transparent;
+  border: 1px solid var(--accent);
+  padding: $space-3 $space-7;
+  cursor: pointer;
+  transition: all $transition-dramatic;
+  text-indent: 0.2em;
+
+  &:hover {
+    background: var(--text-primary);
+    color: var(--bg-primary);
+    border-color: var(--text-primary);
+  }
+}
+
+// ── Progress bar ────────────────────────────────────
+
+.progressTrack {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--border-subtle);
+  z-index: 10;
+}
+
+.progressBar {
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.screenReaderOnly {
+  @include m.sr-only;
+}

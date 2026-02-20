@@ -1,0 +1,409 @@
+@use '@/styles/variables' as *;
+@use '@/styles/mixins' as *;
+@use '@/styles/typography' as *;
+
+// Shared
+.sectionLabel {
+  @include section-label;
+  margin-bottom: $space-2;
+}
+
+.ghostLink {
+  @include accent-text;
+  font-size: $type-sm;
+  color: var(--text-secondary);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  margin-top: $space-5;
+  transition: color $transition-fast;
+
+  &::after {
+    content: ' →';
+    display: inline-block;
+    transition: transform $transition-fast;
+  }
+
+  &:hover {
+    color: var(--accent);
+    &::after { transform: translateX(4px); }
+  }
+}
+
+// ===== HERO =====
+.hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: var(--bg-primary);
+}
+
+.heroWatermark {
+  position: absolute;
+  opacity: 0.03;
+  pointer-events: none;
+}
+
+.heroContent {
+  position: relative;
+  text-align: center;
+  padding: $space-6 $space-4;
+  max-width: 720px;
+}
+
+.heroLabel {
+  @include section-label;
+  margin-bottom: $space-4;
+}
+
+.heroTitle {
+  @include heading;
+  font-size: $type-6xl;
+  margin-bottom: $space-5;
+
+  @include below($bp-md) {
+    font-size: $type-4xl;
+  }
+}
+
+.heroSub {
+  @include body;
+  font-size: $type-md;
+  color: var(--text-secondary);
+  max-width: 500px;
+  margin: 0 auto $space-6;
+}
+
+.heroCtas {
+  display: flex;
+  gap: $space-3;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.heroBtn {
+  @include heading;
+  font-size: $type-xs;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding: $space-3 $space-6;
+  background: var(--accent);
+  color: var(--bg-primary);
+  transition: all $transition-fast;
+
+  &:hover {
+    background: var(--accent-hover);
+    transform: scale(1.02);
+  }
+}
+
+.heroBtnOutline {
+  @include heading;
+  font-size: $type-xs;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding: $space-3 $space-6;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  transition: all $transition-fast;
+
+  &:hover {
+    background: var(--accent-subtle);
+  }
+}
+
+.heroScroll {
+  position: absolute;
+  bottom: $space-6;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $space-2;
+  color: var(--text-muted);
+  font-size: $type-xs;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+}
+
+.heroScrollLine {
+  width: 1px;
+  height: 40px;
+  background: var(--text-muted);
+  animation: scrollPulse 2s ease infinite;
+}
+
+@keyframes scrollPulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+// ===== INTRO =====
+.intro {
+  @include section-padding;
+  background: var(--bg-secondary);
+}
+
+.introInner {
+  @include container;
+  max-width: $max-width-narrow;
+  text-align: center;
+}
+
+.introHeading {
+  @include heading;
+  font-size: $type-3xl;
+  margin-bottom: $space-5;
+
+  @include below($bp-md) {
+    font-size: $type-2xl;
+  }
+}
+
+.introText {
+  @include body;
+  font-size: $type-md;
+  color: var(--text-secondary);
+}
+
+// ===== FEATURED WORK =====
+.featured {
+  @include section-padding;
+}
+
+.featuredInner {
+  @include container;
+}
+
+.featuredHeading {
+  @include heading;
+  font-size: $type-2xl;
+  margin-bottom: $space-6;
+}
+
+.featuredGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: $space-3;
+
+  @include below($bp-md) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @include below($bp-sm) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.featuredItem {
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: $radius-md;
+  @include hover-lift;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+// ===== SERVICES PREVIEW =====
+.services {
+  @include section-padding;
+  background: var(--bg-secondary);
+}
+
+.servicesInner {
+  @include container;
+}
+
+.servicesHeading {
+  @include heading;
+  font-size: $type-2xl;
+  margin-bottom: $space-6;
+}
+
+.servicesGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: $space-4;
+
+  @include below($bp-md) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.serviceCard {
+  @include card-base;
+  padding: $space-5;
+  @include card-hover;
+}
+
+.serviceCardAccent {
+  @include card-accent;
+  padding: $space-5;
+}
+
+.serviceNumber {
+  @include heading;
+  font-size: $type-4xl;
+  color: var(--accent);
+  opacity: 0.4;
+  line-height: 1;
+  display: block;
+  margin-bottom: $space-3;
+}
+
+.serviceTitle {
+  @include heading;
+  font-size: $type-lg;
+  margin-bottom: $space-2;
+}
+
+.serviceText {
+  @include body;
+  font-size: $type-sm;
+  color: var(--text-muted);
+}
+
+// ===== QUOTE =====
+.quote {
+  @include section-padding;
+  background: var(--bg-primary);
+}
+
+.quoteInner {
+  @include container;
+  @include ornamental-frame;
+  max-width: $max-width-narrow;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $space-4;
+}
+
+.quoteText {
+  @include heading;
+  font-size: $type-2xl;
+  font-style: italic;
+
+  @include below($bp-md) {
+    font-size: $type-xl;
+  }
+}
+
+.quoteAuthor {
+  @include accent-text;
+  font-size: $type-sm;
+  color: var(--ornamental);
+}
+
+// ===== PROCESS =====
+.process {
+  @include section-padding;
+  background: var(--bg-secondary);
+}
+
+.processInner {
+  @include container;
+}
+
+.processHeading {
+  @include heading;
+  font-size: $type-2xl;
+  margin-bottom: $space-6;
+}
+
+.stepsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: $space-5;
+
+  @include below($bp-md) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @include below($bp-sm) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+}
+
+.stepNum {
+  @include heading;
+  font-size: $type-4xl;
+  color: var(--accent);
+  opacity: 0.5;
+  line-height: 1;
+}
+
+.stepTitle {
+  @include heading;
+  font-size: $type-lg;
+}
+
+.stepText {
+  @include body;
+  font-size: $type-sm;
+  color: var(--text-muted);
+}
+
+// ===== CTA =====
+.cta {
+  @include section-padding;
+  background: var(--bg-primary);
+  text-align: center;
+}
+
+.ctaInner {
+  @include container;
+  max-width: $max-width-narrow;
+}
+
+.ctaHeading {
+  @include heading;
+  font-size: $type-3xl;
+  margin-bottom: $space-4;
+
+  @include below($bp-md) {
+    font-size: $type-2xl;
+  }
+}
+
+.ctaText {
+  @include body;
+  font-size: $type-md;
+  color: var(--text-secondary);
+  margin-bottom: $space-6;
+}
+
+.ctaBtn {
+  @include heading;
+  font-size: $type-sm;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  display: inline-block;
+  padding: $space-3 $space-7;
+  background: var(--accent);
+  color: var(--bg-primary);
+  transition: all $transition-fast;
+
+  &:hover {
+    background: var(--accent-hover);
+    transform: scale(1.02);
+  }
+}

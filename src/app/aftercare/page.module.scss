@@ -1,0 +1,351 @@
+@use '@/styles/variables' as *;
+@use '@/styles/mixins' as *;
+@use '@/styles/typography' as *;
+
+// ===== HERO =====
+.hero {
+  @include section-padding;
+  background: var(--bg-primary);
+  text-align: center;
+}
+
+.heroInner {
+  @include container;
+  max-width: $max-width-narrow;
+}
+
+.heroHeading {
+  @include heading;
+  font-size: $type-4xl;
+  margin-bottom: $space-3;
+
+  @include below($bp-md) {
+    font-size: $type-3xl;
+  }
+}
+
+.heroIntro {
+  @include body;
+  font-size: $type-md;
+  color: var(--text-secondary);
+}
+
+// ===== PRE-CARE =====
+.preCare {
+  @include section-padding;
+  background: var(--bg-secondary);
+}
+
+.preCareInner {
+  @include container;
+  max-width: $max-width-narrow;
+}
+
+.preCareLabel {
+  @include section-label;
+  margin-bottom: $space-2;
+}
+
+.preCareHeading {
+  @include heading;
+  font-size: $type-2xl;
+  margin-bottom: $space-5;
+
+  @include below($bp-md) {
+    font-size: $type-xl;
+  }
+}
+
+.preCareCard {
+  @include card-accent;
+  padding: $space-5;
+}
+
+.preCareList {
+  list-style: none;
+}
+
+.preCareItem {
+  @include body;
+  font-size: $type-md;
+  color: var(--text-secondary);
+  padding-left: $space-5;
+  position: relative;
+  margin-bottom: $space-3;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  &::before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+  }
+}
+
+// ===== AFTERCARE STEPS =====
+.steps {
+  @include section-padding;
+  background: var(--bg-primary);
+}
+
+.stepsInner {
+  @include container;
+}
+
+.stepsHeading {
+  @include heading;
+  font-size: $type-2xl;
+  margin-bottom: $space-6;
+
+  @include below($bp-md) {
+    font-size: $type-xl;
+  }
+}
+
+.stepsList {
+  display: grid;
+  gap: $space-5;
+  max-width: $max-width-narrow;
+}
+
+.stepItem {
+  display: flex;
+  gap: $space-4;
+  align-items: flex-start;
+}
+
+.stepNum {
+  @include heading;
+  font-size: $type-2xl;
+  color: var(--accent);
+  opacity: 0.8;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.stepText {
+  @include body;
+  font-size: $type-md;
+  color: var(--text-secondary);
+}
+
+// ===== DO'S AND DON'TS =====
+.dosDonts {
+  @include section-padding;
+  background: var(--bg-secondary);
+}
+
+.dosDontsInner {
+  @include container;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $space-6;
+
+  @include below($bp-md) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dosCard {
+  @include card-base;
+  padding: $space-5;
+}
+
+.dontsCard {
+  @include card-ghost;
+  padding: $space-5;
+}
+
+.dosDontsTitle {
+  @include heading;
+  font-size: $type-lg;
+  margin-bottom: $space-4;
+}
+
+.dosList,
+.dontsList {
+  list-style: none;
+}
+
+.dosItem,
+.dontsItem {
+  @include body;
+  font-size: $type-md;
+  color: var(--text-secondary);
+  padding-left: $space-5;
+  position: relative;
+  margin-bottom: $space-3;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.dosItem::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.dontsItem::before {
+  content: "✕";
+  position: absolute;
+  left: 0;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+// ===== PIERCING AFTERCARE =====
+.piercing {
+  @include section-padding;
+  background: var(--bg-primary);
+}
+
+.piercingInner {
+  @include container;
+  max-width: $max-width-narrow;
+}
+
+.piercingHeading {
+  @include heading;
+  font-size: $type-2xl;
+  margin-bottom: $space-5;
+
+  @include below($bp-md) {
+    font-size: $type-xl;
+  }
+}
+
+.piercingCard {
+  @include card-accent;
+  padding: $space-5;
+}
+
+.piercingText {
+  @include body;
+  font-size: $type-md;
+  color: var(--text-secondary);
+}
+
+// ===== FAQ =====
+.faq {
+  @include section-padding;
+  background: var(--bg-secondary);
+}
+
+.faqInner {
+  @include container;
+  max-width: $max-width-narrow;
+}
+
+.faqHeading {
+  @include heading;
+  font-size: $type-2xl;
+  margin-bottom: $space-6;
+
+  @include below($bp-md) {
+    font-size: $type-xl;
+  }
+}
+
+.faqList {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+}
+
+.faqItem {
+  @include card-base;
+  overflow: hidden;
+}
+
+.faqQuestion {
+  @include heading;
+  font-size: $type-base;
+  width: 100%;
+  text-align: left;
+  padding: $space-4;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: $space-3;
+  cursor: pointer;
+  background: transparent;
+  color: var(--text-primary);
+  transition: background $transition-fast;
+
+  &:hover {
+    background: var(--accent-subtle);
+  }
+}
+
+.faqIcon {
+  flex-shrink: 0;
+  transition: transform $transition-base;
+  color: var(--accent);
+
+  &.open {
+    transform: rotate(180deg);
+  }
+}
+
+.faqAnswer {
+  @include body;
+  font-size: $type-sm;
+  color: var(--text-secondary);
+  padding: 0 $space-4 $space-4;
+  padding-top: 0;
+
+  &.open {
+    padding-top: 0;
+  }
+}
+
+.faqAnswerInner {
+  padding-top: 0;
+}
+
+// ===== CTA =====
+.cta {
+  @include section-padding;
+  background: var(--bg-primary);
+  text-align: center;
+}
+
+.ctaInner {
+  @include container;
+  max-width: $max-width-narrow;
+}
+
+.ctaHeading {
+  @include heading;
+  font-size: $type-3xl;
+  margin-bottom: $space-4;
+
+  @include below($bp-md) {
+    font-size: $type-2xl;
+  }
+}
+
+.ctaLink {
+  @include heading;
+  font-size: $type-sm;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  display: inline-block;
+  padding: $space-3 $space-7;
+  background: var(--accent);
+  color: var(--bg-primary);
+  transition: all $transition-fast;
+
+  &:hover {
+    background: var(--accent-hover);
+    transform: scale(1.02);
+  }
+}
