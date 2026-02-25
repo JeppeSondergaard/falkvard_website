@@ -1,13 +1,14 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import s from "./page.module.scss";
 
 type ServiceType = "tatovering" | "piercing" | "konsultation" | "";
 type SubmitState = "idle" | "loading" | "success" | "error";
+type FaqItem = { q: string; a: string };
 
-const FAQ = [
+const DEFAULT_FAQ: FaqItem[] = [
   {
     q: "Hvor lang tid tager en tatovering?",
     a: "Det kommer helt an på størrelse og detaljegrad. Små tatoveringer tager typisk 1-2 timer, mens større projekter kan tage flere sessioner.",
@@ -37,6 +38,28 @@ export default function BookingPage() {
   const [submitState, setSubmitState] = useState<SubmitState>("idle");
   const [submitError, setSubmitError] = useState("");
   const formRef = useRef<HTMLFormElement>(null);
+
+  const [heading, setHeading] = useState("Book en tid");
+  const [intro, setIntro] = useState(
+    "Udfyld formularen herunder, så vender jeg tilbage hurtigst muligt med en bekræftelse og evt. designforslag."
+  );
+  const [faq, setFaq] = useState<FaqItem[]>(DEFAULT_FAQ);
+
+  useEffect(() => {
+    fetch("/api/site-content")
+      .then((res) => res.json())
+      .then((data: Record<string, string>) => {
+        if (data["booking.heading"]) setHeading(data["booking.heading"]);
+        if (data["booking.intro"]) setIntro(data["booking.intro"]);
+        if (data["booking.faq"]) {
+          try {
+            const parsed = JSON.parse(data["booking.faq"]);
+            if (Array.isArray(parsed)) setFaq(parsed);
+          } catch { /* keep default */ }
+        }
+      })
+      .catch(() => { /* use defaults */ });
+  }, []);
 
   function handleServiceSelect(svc: ServiceType) {
     setService(svc);
@@ -106,11 +129,8 @@ export default function BookingPage() {
     <>
       <section className={s.section}>
         <div className={s.inner}>
-          <h1 className={s.heading}>Book en tid</h1>
-          <p className={s.intro}>
-            Udfyld formularen herunder, så vender jeg tilbage hurtigst muligt
-            med en bekræftelse og evt. designforslag.
-          </p>
+          <h1 className={s.heading}>{heading}</h1>
+          <p className={s.intro}>{intro}</p>
 
           {/* Step indicators */}
           <div className={s.steps}>
@@ -331,7 +351,7 @@ export default function BookingPage() {
         <div className={s.inner}>
           <h2 className={s.faqHeading}>Ofte stillede spørgsmål</h2>
           <div className={s.faqList}>
-            {FAQ.map((item, i) => (
+            {faq.map((item, i) => (
               <div
                 key={i}
                 className={`${s.faqItem} ${openFaq === i ? s.faqOpen : ""}`}

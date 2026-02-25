@@ -53,28 +53,112 @@
 .folderItem {
   display: flex;
   align-items: center;
-  gap: $space-3;
   width: 100%;
-  padding: $space-2 $space-4;
   background: transparent;
-  border: none;
-  cursor: pointer;
+  border-left: 2px solid transparent;
   transition: all $transition-fast;
-  text-align: left;
 
   &:hover {
     background: var(--accent-subtle);
+
+    .folderActions {
+      opacity: 1;
+    }
   }
 
   &.active {
     background: var(--bg-elevated);
-    border-left: 2px solid var(--accent);
-    padding-left: calc(#{$space-4} - 2px);
+    border-left-color: var(--accent);
   }
+
+  &.folderDropTarget {
+    background: var(--accent-subtle);
+    border-left-color: var(--accent);
+    transform: scale(1.02);
+
+    .folderIcon {
+      color: var(--accent);
+    }
+
+    .folderLabel {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+  }
+
+  @include below($bp-md) {
+    justify-content: center;
+  }
+}
+
+.folderButton {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+  flex: 1;
+  padding: $space-2 $space-4;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  min-width: 0;
 
   @include below($bp-md) {
     padding: $space-2;
     justify-content: center;
+  }
+}
+
+.folderActions {
+  display: flex;
+  align-items: center;
+  padding-right: $space-2;
+  opacity: 0;
+  transition: opacity $transition-fast;
+
+  @include below($bp-md) {
+    display: none;
+  }
+}
+
+.folderDeleteBtn {
+  @include body;
+  font-size: $type-xs;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: $radius-sm;
+  transition: all $transition-fast;
+
+  &:hover {
+    color: #e55;
+    background: rgba(238, 85, 85, 0.1);
+  }
+}
+
+.folderConfirmDeleteBtn {
+  @include heading;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 1px 6px;
+  background: rgba(238, 85, 85, 0.15);
+  border: 1px solid #e55;
+  border-radius: $radius-sm;
+  color: #e55;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all $transition-fast;
+
+  &:hover {
+    background: #e55;
+    color: #fff;
   }
 }
 
@@ -468,4 +552,118 @@
   text-align: center;
   font-size: $type-sm;
   color: var(--text-muted);
+}
+
+// Add folder section
+.addFolderSection {
+  padding: $space-3 $space-4;
+  border-top: 1px solid var(--border);
+  margin-top: $space-3;
+
+  @include below($bp-md) {
+    padding: $space-2;
+  }
+}
+
+.addFolderToggle {
+  @include body;
+  font-size: $type-sm;
+  width: 100%;
+  padding: $space-2;
+  background: transparent;
+  border: 1px dashed var(--border);
+  border-radius: $radius-sm;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all $transition-fast;
+  text-align: center;
+
+  &:hover {
+    border-color: var(--accent-border);
+    color: var(--text-primary);
+    background: var(--accent-subtle);
+  }
+}
+
+.addFolderForm {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+}
+
+.addFolderInput {
+  @include body;
+  font-size: $type-sm;
+  width: 100%;
+  padding: $space-2;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: $radius-sm;
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color $transition-fast;
+
+  &::placeholder {
+    color: var(--text-muted);
+  }
+
+  &:focus {
+    border-color: var(--accent);
+  }
+}
+
+.addFolderIconInput {
+  @extend .addFolderInput;
+  width: 60px;
+  text-align: center;
+  font-size: $type-base;
+}
+
+.addFolderActions {
+  display: flex;
+  gap: $space-1;
+}
+
+.addFolderSave {
+  @include heading;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  flex: 1;
+  padding: $space-1 $space-2;
+  background: var(--accent);
+  color: var(--bg-primary);
+  border: none;
+  border-radius: $radius-sm;
+  cursor: pointer;
+  transition: all $transition-fast;
+
+  &:hover:not(:disabled) {
+    background: var(--accent-hover);
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.addFolderCancel {
+  @include heading;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  flex: 1;
+  padding: $space-1 $space-2;
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: $radius-sm;
+  cursor: pointer;
+  transition: all $transition-fast;
+
+  &:hover {
+    border-color: var(--text-muted);
+    color: var(--text-primary);
+  }
 }

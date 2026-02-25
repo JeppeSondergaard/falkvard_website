@@ -5,6 +5,12 @@ import { useRouter } from "next/navigation";
 import AdminNav from "@/components/AdminNav";
 import s from "./dashboard.module.scss";
 
+type ChatMessage = {
+  role: "user" | "assistant";
+  content: string;
+  image_urls?: string[];
+};
+
 type Booking = {
   id: string;
   name: string;
@@ -15,6 +21,7 @@ type Booking = {
   size: string | null;
   description: string | null;
   reference_urls: string | null;
+  chat_history: string | null;
   status: string;
   source: string;
   created_at: string;
@@ -180,6 +187,39 @@ export default function DashboardPage() {
                         </div>
                       )}
                     </div>
+
+                    {b.chat_history && (() => {
+                      let messages: ChatMessage[] = [];
+                      try { messages = JSON.parse(b.chat_history); } catch { /* invalid json */ }
+                      if (!messages.length) return null;
+                      return (
+                        <div className={s.chatSection}>
+                          <strong className={s.chatLabel}>Samtale</strong>
+                          <div className={s.chatThread}>
+                            {messages.map((msg, i) => (
+                              <div key={i} className={`${s.chatMsg} ${s[msg.role]}`}>
+                                <span className={s.chatRole}>
+                                  {msg.role === "user" ? "Kunde" : "AI"}
+                                </span>
+                                <p className={s.chatContent}>{msg.content}</p>
+                                {msg.image_urls?.map((url, j) => (
+                                  <a
+                                    key={j}
+                                    href={url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className={s.chatImgLink}
+                                  >
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img src={url} alt={`Design ${j + 1}`} className={s.chatImg} />
+                                  </a>
+                                ))}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })()}
 
                     {b.status === "pending" && (
                       <div className={s.actions}>

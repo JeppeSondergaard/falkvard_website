@@ -3,6 +3,7 @@ import "@/styles/globals.scss";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ChatWidget from "@/components/ChatWidget";
+import PostHogProvider from "@/components/PostHogProvider";
 
 export const metadata: Metadata = {
   title: "A Falkvard Tattoo | Tatoveringer med sjæl",
@@ -28,10 +29,12 @@ export default function RootLayout({
   return (
     <html lang="da">
       <body suppressHydrationWarning>
-        <Header />
-        <main>{children}</main>
-        <Footer />
-        <ChatWidget />
+        <PostHogProvider>
+          <Header />
+          <main>{children}</main>
+          <Footer />
+          <ChatWidget />
+        </PostHogProvider>
       </body>
     </html>
   );

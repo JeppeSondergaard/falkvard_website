@@ -7,7 +7,7 @@ import StoneHouse, { HOUSE_POS, HOUSE_EXCL } from './StoneHouse'
 
 // ─── Configuration ──────────────────────────────────────
 const CFG = {
-  fogDensity: 0.036,
+  fogDensity: 0.028,
   fogColor: 0x0e0e16,
   treeColor: 0x060608,
   fernColor: 0x101a10,
@@ -16,22 +16,37 @@ const CFG = {
   groundColor: 0x08080c,
   foxColor: 0x100c08,
   leafColor: 0x0d0e08,
-  recycleDist: 55,
-  placeMin: 36,
-  placeMax: 55,
-  initRadius: 50,
+  pineColor: 0x080c06,
+  recycleDist: 65,
+  placeMin: 58,
+  placeMax: 65,
+  initRadius: 60,
   grassRadius: 18,
-  grassRecycle: 22,
+  grassRecycle: 24,
   cameraHeight: 2.5,
   autoSpeed: 1.8,
   autoRamp: 4,
   autoDelay: 0.8,
   moveSpeed: 5.5,
+  mobileSpeed: 2.8,
   mouseSens: 0.0018,
   houseX: HOUSE_POS[0],
   houseZ: HOUSE_POS[2],
   houseR: HOUSE_EXCL,
+  pathHalfW: 4,
 }
+
+function onPath(px: number, pz: number) {
+  return Math.abs(px) < CFG.pathHalfW && pz > CFG.houseZ - 2 && pz < 2
+}
+function pastCliff(pz: number) { return pz < CLIFF_Z + 4 }
+
+// ─── Coastal Geometry Constants ──────────────────────────
+const CLIFF_Z = HOUSE_POS[2] - 25
+const CLIFF_W = 80
+const CLIFF_H = 30
+const CLIFF_DEPTH = 6
+const OCEAN_Y = -24
 
 // ─── Seeded PRNG ────────────────────────────────────────
 function mulberry32(seed: number) {
@@ -154,6 +169,53 @@ function createBush(): THREE.BufferGeometry {
   return mergeGeoms(parts)
 }
 
+interface PinePreset {
+  seed: number; height: [number, number]; trunkR: [number, number]
+  baseR: [number, number]; tiers: [number, number]; taper: number
+}
+
+const PINE_PRESETS: PinePreset[] = [
+  { seed: 500, height: [6, 10], trunkR: [0.04, 0.08], baseR: [1.0, 1.6], tiers: [5, 7], taper: 0.72 },
+  { seed: 601, height: [4, 7], trunkR: [0.03, 0.06], baseR: [0.8, 1.3], tiers: [4, 6], taper: 0.68 },
+  { seed: 719, height: [8, 13], trunkR: [0.05, 0.1], baseR: [0.7, 1.1], tiers: [6, 8], taper: 0.78 },
+]
+
+function createPineTree(p: PinePreset): THREE.BufferGeometry {
+  const rng = mulberry32(p.seed)
+  const lerp = (a: number, b: number) => a + rng() * (b - a)
+  const parts: THREE.BufferGeometry[] = []
+
+  const h = lerp(...p.height)
+  const trR = lerp(...p.trunkR)
+  const bR = lerp(...p.baseR)
+  const nTiers = Math.floor(lerp(...p.tiers))
+
+  const trunk = new THREE.CylinderGeometry(trR * 0.4, trR, h, 5, 1)
+  trunk.translate(0, h / 2, 0)
+  parts.push(trunk)
+
+  const startY = h * 0.25
+  const tierSpacing = (h * 0.85 - startY) / nTiers
+
+  for (let i = 0; i < nTiers; i++) {
+    const t = i / Math.max(nTiers - 1, 1)
+    const r = bR * (1 - t * (1 - p.taper * 0.3)) * (0.85 + rng() * 0.3)
+    const ch = tierSpacing * (1.3 - t * 0.4) * (0.9 + rng() * 0.2)
+    const y = startY + i * tierSpacing
+    const cone = new THREE.ConeGeometry(r, ch, 6, 1)
+    cone.translate((rng() - 0.5) * 0.04, y + ch * 0.4, (rng() - 0.5) * 0.04)
+    parts.push(cone)
+  }
+
+  const topR = bR * 0.15 * (0.8 + rng() * 0.4)
+  const topH = tierSpacing * 0.8
+  const top = new THREE.ConeGeometry(topR, topH, 5, 1)
+  top.translate(0, startY + nTiers * tierSpacing + topH * 0.3, 0)
+  parts.push(top)
+
+  return mergeGeoms(parts)
+}
+
 function createGrassBlade(): THREE.BufferGeometry {
   const g = new THREE.BufferGeometry()
   g.setAttribute('position', new THREE.Float32BufferAttribute([
@@ -176,8 +238,13 @@ function FloraInstances({ geometry, color, count, seed, scaleRange, windAmp, win
   const data = useMemo(() => {
     const arr: FloraData[] = []
     for (let i = 0; i < count; i++) {
-      const a = rng() * Math.PI * 2, d = 3 + rng() * (CFG.initRadius - 3)
-      arr.push({ x: Math.cos(a) * d, z: Math.sin(a) * d, scale: scaleRange[0] + rng() * (scaleRange[1] - scaleRange[0]), rotY: rng() * Math.PI * 2 })
+      let x: number, z: number
+      for (let tries = 0; tries < 20; tries++) {
+        const a = rng() * Math.PI * 2, d = 10 + rng() * (CFG.initRadius - 10)
+        x = Math.cos(a) * d; z = Math.sin(a) * d
+        if (!onPath(x, z) && !pastCliff(z)) break
+      }
+      arr.push({ x: x!, z: z!, scale: scaleRange[0] + rng() * (scaleRange[1] - scaleRange[0]), rotY: rng() * Math.PI * 2 })
     }
     return arr
   }, [count, rng, scaleRange])
@@ -191,14 +258,21 @@ function FloraInstances({ geometry, color, count, seed, scaleRange, windAmp, win
     for (let i = 0; i < count; i++) {
       const d = data[i], dx = d.x - cx, dz = d.z - cz
       if (dx * dx + dz * dz > CFG.recycleDist * CFG.recycleDist) {
-        const a = Math.random() * Math.PI * 2, r = CFG.placeMin + Math.random() * (CFG.placeMax - CFG.placeMin)
-        d.x = cx + Math.cos(a) * r; d.z = cz + Math.sin(a) * r; d.rotY = Math.random() * Math.PI * 2
+        for (let tries = 0; tries < 10; tries++) {
+          const a = Math.random() * Math.PI * 2, r = CFG.placeMin + Math.random() * (CFG.placeMax - CFG.placeMin)
+          d.x = cx + Math.cos(a) * r; d.z = cz + Math.sin(a) * r; d.rotY = Math.random() * Math.PI * 2
+          if (!onPath(d.x, d.z) && !pastCliff(d.z)) break
+        }
       }
       const hx = d.x - CFG.houseX, hz = d.z - CFG.houseZ
       if (hx * hx + hz * hz < CFG.houseR * CFG.houseR) {
         const ha = Math.atan2(hz, hx)
         d.x = CFG.houseX + Math.cos(ha) * (CFG.houseR + 1); d.z = CFG.houseZ + Math.sin(ha) * (CFG.houseR + 1)
       }
+      if (onPath(d.x, d.z)) {
+        d.x = (d.x >= 0 ? 1 : -1) * (CFG.pathHalfW + 1)
+      }
+      if (pastCliff(d.z)) d.z = CLIFF_Z + 5
       const phase = d.x * 0.5 + d.z * 0.3
       e.set(Math.sin(t * windFreq + phase) * windAmp, d.rotY, Math.cos(t * windFreq * 0.7 + phase * 1.3) * windAmp * 0.6)
       q.setFromEuler(e); p.set(d.x, 0, d.z); s.set(d.scale, d.scale, d.scale)
@@ -232,8 +306,9 @@ function GrassField({ count = 2000 }: { count?: number }) {
     for (let i = 0; i < count; i++) {
       const d = data[i], dx = d.x - cx, dz = d.z - cz
       if (dx * dx + dz * dz > CFG.grassRecycle * CFG.grassRecycle) {
-        const a = Math.random() * Math.PI * 2, r = 2 + Math.random() * (CFG.grassRadius - 2)
+        const a = Math.random() * Math.PI * 2, r = CFG.grassRadius * 0.6 + Math.random() * (CFG.grassRadius * 0.4)
         d.x = cx + Math.cos(a) * r; d.z = cz + Math.sin(a) * r; d.rotY = Math.random() * Math.PI * 2
+        if (pastCliff(d.z)) d.z = CLIFF_Z + 5
       }
       const phase = d.x * 0.8 + d.z * 0.6
       e.set(Math.sin(t * 2.5 + phase) * 0.2 + Math.sin(t * 1.2 + phase * 0.7) * 0.08, d.rotY, Math.cos(t * 2.0 + phase * 1.3) * 0.12)
@@ -266,7 +341,7 @@ function Lanterns({ count = 30 }: { count?: number }) {
   const data = useMemo(() => {
     const arr: LanternData[] = [], rng = mulberry32(555)
     for (let i = 0; i < count; i++) {
-      const a = rng() * Math.PI * 2, d = 5 + rng() * (CFG.initRadius - 5)
+      const a = rng() * Math.PI * 2, d = 10 + rng() * (CFG.initRadius - 10)
       arr.push({ x: Math.cos(a) * d, z: Math.sin(a) * d, y: 2.5 + rng() * 2.2 })
     }
     return arr
@@ -372,6 +447,74 @@ function Stars({ count = 900 }: { count?: number }) {
   )
 }
 
+// ─── Logo Constellation ─────────────────────────────────
+function LogoConstellation() {
+  const groupRef = useRef<THREE.Group>(null!)
+  const starsRef = useRef<THREE.Points>(null!)
+  const { camera } = useThree()
+
+  const { starGeo, lineGeo } = useMemo(() => {
+    const verts: [number, number][] = [
+      [0, 0.5],       // 0: apex
+      [-0.5, -0.5],   // 1: bottom-left
+      [0.5, -0.5],    // 2: bottom-right
+      [0, -0.5],      // 3: bottom-center
+      [-0.22, 0.05],  // 4: inner-left (on outer left edge)
+      [0.22, 0.05],   // 5: inner-right (on outer right edge)
+    ]
+    const edges: [number, number][] = [
+      [0, 4], [4, 1],
+      [1, 3], [3, 2],
+      [2, 5], [5, 0],
+      [0, 3],
+      [4, 3], [5, 3],
+    ]
+
+    const skyR = 95, scale = 14
+    const elev = 25 * Math.PI / 180
+    const cDir = new THREE.Vector3(0, Math.sin(elev), -Math.cos(elev))
+    const center = cDir.clone().multiplyScalar(skyR)
+    const right = new THREE.Vector3(1, 0, 0)
+    const up = new THREE.Vector3().crossVectors(right, cDir).normalize()
+
+    const pts = verts.map(([lx, ly]) =>
+      center.clone().addScaledVector(right, lx * scale).addScaledVector(up, ly * scale).normalize().multiplyScalar(skyR)
+    )
+
+    const sp = new Float32Array(pts.length * 3)
+    pts.forEach((p, i) => { sp[i * 3] = p.x; sp[i * 3 + 1] = p.y; sp[i * 3 + 2] = p.z })
+    const sg = new THREE.BufferGeometry()
+    sg.setAttribute('position', new THREE.Float32BufferAttribute(sp, 3))
+
+    const lp: number[] = []
+    edges.forEach(([a, b]) => { lp.push(pts[a].x, pts[a].y, pts[a].z, pts[b].x, pts[b].y, pts[b].z) })
+    const lg = new THREE.BufferGeometry()
+    lg.setAttribute('position', new THREE.Float32BufferAttribute(lp, 3))
+
+    return { starGeo: sg, lineGeo: lg }
+  }, [])
+
+  useFrame(({ clock }) => {
+    if (!groupRef.current) return
+    groupRef.current.position.copy(camera.position)
+    if (starsRef.current) {
+      const mat = starsRef.current.material as THREE.PointsMaterial
+      mat.opacity = 0.65 + Math.sin(clock.elapsedTime * 0.7) * 0.15
+    }
+  })
+
+  return (
+    <group ref={groupRef}>
+      <points ref={starsRef} geometry={starGeo}>
+        <pointsMaterial color={0xccddff} size={2.8} transparent opacity={0.7} sizeAttenuation={false} fog={false} depthWrite={false} />
+      </points>
+      <lineSegments geometry={lineGeo}>
+        <lineBasicMaterial color={0x667799} transparent opacity={0.1} fog={false} depthWrite={false} />
+      </lineSegments>
+    </group>
+  )
+}
+
 // ─── Drifting Clouds ────────────────────────────────────
 function Clouds() {
   const groupRef = useRef<THREE.Group>(null!)
@@ -379,15 +522,16 @@ function Clouds() {
 
   const cloudData = useMemo(() => {
     const rng = mulberry32(888)
-    return Array.from({ length: 14 }, () => ({
-      offX: (rng() - 0.5) * 160,
-      y: 18 + rng() * 28,
-      offZ: (rng() - 0.5) * 160,
-      w: 20 + rng() * 45,
-      h: 14 + rng() * 28,
-      speed: 0.06 + rng() * 0.12,
+    return Array.from({ length: 22 }, () => ({
+      offX: (rng() - 0.5) * 180,
+      y: 22 + rng() * 30,
+      offZ: (rng() - 0.5) * 180,
+      w: 18 + rng() * 40,
+      h: 10 + rng() * 22,
+      speed: 0.08 + rng() * 0.18,
       rot: rng() * Math.PI,
-      opacity: 0.012 + rng() * 0.022,
+      opacity: 0.03 + rng() * 0.05,
+      tint: rng() > 0.6 ? 0x1c2030 : 0x141420,
     }))
   }, [])
 
@@ -408,7 +552,7 @@ function Clouds() {
       {cloudData.map((d, i) => (
         <mesh key={i} rotation={[-Math.PI / 2, 0, d.rot]}>
           <planeGeometry args={[d.w, d.h]} />
-          <meshBasicMaterial color={0x141420} transparent opacity={d.opacity} side={THREE.DoubleSide} fog={false} depthWrite={false} />
+          <meshBasicMaterial color={d.tint} transparent opacity={d.opacity} side={THREE.DoubleSide} fog={false} depthWrite={false} />
         </mesh>
       ))}
     </group>
@@ -435,22 +579,14 @@ function Moon() {
     <>
       <group ref={groupRef}>
         <mesh>
-          <circleGeometry args={[3.5, 32]} />
-          <meshBasicMaterial color={0x445577} transparent opacity={0.3} fog={false} />
-        </mesh>
-        <mesh>
-          <circleGeometry args={[8, 32]} />
-          <meshBasicMaterial color={0x223344} transparent opacity={0.07} fog={false} />
-        </mesh>
-        <mesh>
-          <circleGeometry args={[18, 32]} />
-          <meshBasicMaterial color={0x151c28} transparent opacity={0.035} fog={false} />
+          <circleGeometry args={[3, 32]} />
+          <meshBasicMaterial color={0xc8d8ee} fog={false} />
         </mesh>
       </group>
       <directionalLight
         ref={lightRef}
-        color={0x5577aa}
-        intensity={0.2}
+        color={0x7799cc}
+        intensity={0.4}
         castShadow
         shadow-mapSize-width={1024}
         shadow-mapSize-height={1024}
@@ -664,6 +800,8 @@ function FallingLeaves({ count = 300 }: { count?: number }) {
 }
 
 // ─── Ground ─────────────────────────────────────────────
+const groundClip = [new THREE.Plane(new THREE.Vector3(0, 0, 1), -(CLIFF_Z + 1))]
+
 function Ground() {
   const ref = useRef<THREE.Mesh>(null!)
   const { camera } = useThree()
@@ -671,12 +809,31 @@ function Ground() {
   return (
     <mesh ref={ref} rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.05, 0]} receiveShadow>
       <planeGeometry args={[400, 400]} />
-      <meshStandardMaterial color={CFG.groundColor} roughness={1} metalness={0} />
+      <meshStandardMaterial color={CFG.groundColor} roughness={1} metalness={0} clippingPlanes={groundClip} />
     </mesh>
   )
 }
 
 // ─── Camera Controller ──────────────────────────────────
+const JOY_DEAD = 10, JOY_MAX = 50, JOY_LOOK_SENS = 1.1
+type Joy = { active: boolean; id: number; ox: number; oy: number; dx: number; dy: number }
+const joyDefault = (): Joy => ({ active: false, id: -1, ox: 0, oy: 0, dx: 0, dy: 0 })
+
+function makeJoystickEl(size: number, isFill: boolean) {
+  const el = document.createElement('div')
+  const s = el.style
+  s.position = 'fixed'; s.width = s.height = `${size}px`; s.borderRadius = '50%'
+  s.pointerEvents = 'none'; s.zIndex = '200'; s.display = 'none'
+  s.transition = 'opacity 0.15s'
+  if (isFill) {
+    s.background = 'rgba(255,255,255,0.1)'; s.border = '1px solid rgba(255,255,255,0.22)'
+  } else {
+    s.border = '1.5px solid rgba(255,255,255,0.15)'
+  }
+  document.body.appendChild(el)
+  return el
+}
+
 function CameraController({ onInteract }: { onInteract?: () => void }) {
   const { camera, gl } = useThree()
   const euler = useRef(new THREE.Euler(0, 0, 0, 'YXZ'))
@@ -689,9 +846,59 @@ function CameraController({ onInteract }: { onInteract?: () => void }) {
   const interacted = useRef(false)
   const moveDir = useRef(new THREE.Vector3())
   const yawEuler = useRef(new THREE.Euler(0, 0, 0, 'YXZ'))
+  const isMobile = useRef(false)
+  const moveJoy = useRef(joyDefault())
+  const lookJoy = useRef(joyDefault())
+  const joyEls = useRef<{
+    mO: HTMLDivElement; mI: HTMLDivElement; lO: HTMLDivElement; lI: HTMLDivElement
+    mRest: HTMLDivElement; mRestDot: HTMLDivElement; lRest: HTMLDivElement; lRestDot: HTMLDivElement
+  } | null>(null)
 
   useEffect(() => {
     camera.position.set(0, CFG.cameraHeight, 0); camera.quaternion.setFromEuler(euler.current)
+    isMobile.current = 'ontouchstart' in window
+
+    if (isMobile.current) {
+      const outerSize = 90, innerSize = 34
+
+      const makeRest = (left: string, label: string) => {
+        const wrap = document.createElement('div')
+        const ws = wrap.style
+        ws.position = 'fixed'; ws.bottom = '72px'; ws.left = left
+        ws.width = '70px'; ws.height = '70px'; ws.borderRadius = '50%'
+        ws.border = '1.5px solid rgba(255,255,255,0.12)'
+        ws.pointerEvents = 'none'; ws.zIndex = '150'
+        ws.display = 'flex'; ws.alignItems = 'center'; ws.justifyContent = 'center'
+        const dot = document.createElement('div')
+        const ds = dot.style
+        ds.width = '22px'; ds.height = '22px'; ds.borderRadius = '50%'
+        ds.background = 'rgba(255,255,255,0.08)'
+        ds.border = '1px solid rgba(255,255,255,0.15)'
+        wrap.appendChild(dot)
+        const lbl = document.createElement('div')
+        const ls = lbl.style
+        ls.position = 'absolute'; ls.bottom = '-20px'; ls.left = '50%'
+        ls.transform = 'translateX(-50%)'; ls.whiteSpace = 'nowrap'
+        ls.fontSize = '9px'; ls.letterSpacing = '0.08em'; ls.textTransform = 'uppercase'
+        ls.color = 'rgba(255,255,255,0.18)'; ls.fontFamily = 'sans-serif'
+        ls.pointerEvents = 'none'
+        lbl.textContent = label
+        wrap.appendChild(lbl)
+        document.body.appendChild(wrap)
+        return { wrap, dot }
+      }
+
+      const mRest = makeRest('calc(25% - 35px)', 'Move')
+      const lRest = makeRest('calc(75% - 35px)', 'Look')
+
+      joyEls.current = {
+        mO: makeJoystickEl(outerSize, false), mI: makeJoystickEl(innerSize, true),
+        lO: makeJoystickEl(outerSize, false), lI: makeJoystickEl(innerSize, true),
+        mRest: mRest.wrap, mRestDot: mRest.dot,
+        lRest: lRest.wrap, lRestDot: lRest.dot,
+      }
+    }
+
     const mKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyA', 'KeyS', 'KeyD']
     const onKD = (e: KeyboardEvent) => { keys.current.add(e.code); if (mKeys.includes(e.code)) { e.preventDefault(); if (autoWalk.current) autoWalk.current = false; if (!interacted.current) { interacted.current = true; onInteract?.() } } }
     const onKU = (e: KeyboardEvent) => keys.current.delete(e.code)
@@ -699,13 +906,64 @@ function CameraController({ onInteract }: { onInteract?: () => void }) {
       if (document.pointerLockElement === gl.domElement) { euler.current.y -= e.movementX * CFG.mouseSens; euler.current.x -= e.movementY * CFG.mouseSens; euler.current.x = Math.max(-1.2, Math.min(1.2, euler.current.x)) }
       else { mouse.current.x = (e.clientX / window.innerWidth - 0.5) * 2; mouse.current.y = (e.clientY / window.innerHeight - 0.5) * 2 }
     }
-    const onCl = () => { if (!locked.current) gl.domElement.requestPointerLock?.(); if (!interacted.current) { interacted.current = true; onInteract?.() } }
+    const onCl = () => {
+      if (!interacted.current) { interacted.current = true; onInteract?.() }
+      if (isMobile.current) return
+      if (locked.current) document.exitPointerLock(); else gl.domElement.requestPointerLock?.()
+    }
     const onLC = () => { locked.current = document.pointerLockElement === gl.domElement }
-    const onTM = (e: TouchEvent) => { if (e.touches.length) { mouse.current.x = (e.touches[0].clientX / window.innerWidth - 0.5) * 2; mouse.current.y = (e.touches[0].clientY / window.innerHeight - 0.5) * 2 } }
+
+    const halfW = () => window.innerWidth / 2
+    const onTS = (e: TouchEvent) => {
+      if (autoWalk.current) autoWalk.current = false
+      if (!interacted.current) { interacted.current = true; onInteract?.() }
+      for (const t of Array.from(e.changedTouches)) {
+        if (t.clientX < halfW() && !moveJoy.current.active) {
+          moveJoy.current = { active: true, id: t.identifier, ox: t.clientX, oy: t.clientY, dx: 0, dy: 0 }
+        } else if (t.clientX >= halfW() && !lookJoy.current.active) {
+          lookJoy.current = { active: true, id: t.identifier, ox: t.clientX, oy: t.clientY, dx: 0, dy: 0 }
+        }
+      }
+    }
+    const onTM = (e: TouchEvent) => {
+      for (const t of Array.from(e.changedTouches)) {
+        if (t.identifier === moveJoy.current.id) {
+          moveJoy.current.dx = t.clientX - moveJoy.current.ox
+          moveJoy.current.dy = t.clientY - moveJoy.current.oy
+        } else if (t.identifier === lookJoy.current.id) {
+          lookJoy.current.dx = t.clientX - lookJoy.current.ox
+          lookJoy.current.dy = t.clientY - lookJoy.current.oy
+        }
+      }
+    }
+    const endJoy = (id: number) => {
+      if (id === moveJoy.current.id) moveJoy.current = joyDefault()
+      if (id === lookJoy.current.id) lookJoy.current = joyDefault()
+    }
+    const onTE = (e: TouchEvent) => { for (const t of Array.from(e.changedTouches)) endJoy(t.identifier) }
+
     window.addEventListener('keydown', onKD); window.addEventListener('keyup', onKU)
-    window.addEventListener('mousemove', onMM); window.addEventListener('touchmove', onTM, { passive: true })
+    window.addEventListener('mousemove', onMM)
     gl.domElement.addEventListener('click', onCl); document.addEventListener('pointerlockchange', onLC)
-    return () => { window.removeEventListener('keydown', onKD); window.removeEventListener('keyup', onKU); window.removeEventListener('mousemove', onMM); window.removeEventListener('touchmove', onTM); gl.domElement.removeEventListener('click', onCl); document.removeEventListener('pointerlockchange', onLC) }
+    window.addEventListener('touchstart', onTS, { passive: true })
+    window.addEventListener('touchmove', onTM, { passive: true })
+    window.addEventListener('touchend', onTE)
+    window.addEventListener('touchcancel', onTE)
+
+    return () => {
+      window.removeEventListener('keydown', onKD); window.removeEventListener('keyup', onKU)
+      window.removeEventListener('mousemove', onMM)
+      gl.domElement.removeEventListener('click', onCl); document.removeEventListener('pointerlockchange', onLC)
+      window.removeEventListener('touchstart', onTS)
+      window.removeEventListener('touchmove', onTM)
+      window.removeEventListener('touchend', onTE)
+      window.removeEventListener('touchcancel', onTE)
+      if (joyEls.current) {
+        joyEls.current.mO.remove(); joyEls.current.mI.remove()
+        joyEls.current.lO.remove(); joyEls.current.lI.remove()
+        joyEls.current.mRest.remove(); joyEls.current.lRest.remove()
+      }
+    }
   }, [camera, gl, onInteract])
 
   useFrame((_, delta) => {
@@ -713,28 +971,83 @@ function CameraController({ onInteract }: { onInteract?: () => void }) {
     if (autoWalk.current) {
       const dx = camera.position.x - CFG.houseX, dz = camera.position.z - CFG.houseZ
       const distToHouse = Math.sqrt(dx * dx + dz * dz)
-      if (distToHouse <= 15) {
+      const stopInner = 12, stopOuter = 35
+      if (distToHouse <= stopInner) {
         autoWalk.current = false
         md.set(0, 0, 0)
       } else {
-        const t = Math.max(0, elapsed.current - CFG.autoDelay), speed = Math.min(1, t / CFG.autoRamp) * CFG.autoSpeed
+        const approach = Math.min(1, Math.max(0, (distToHouse - stopInner) / (stopOuter - stopInner)))
+        const ease = approach * approach * (3 - 2 * approach)
+        const t = Math.max(0, elapsed.current - CFG.autoDelay), speed = Math.min(1, t / CFG.autoRamp) * CFG.autoSpeed * ease
         if (!locked.current) { euler.current.y += (-mouse.current.x * 0.35 - euler.current.y) * 0.015; euler.current.x += (-mouse.current.y * 0.12 - euler.current.x) * 0.015 }
         euler.current.y += Math.sin(elapsed.current * 0.2) * 0.0003
         md.set(0, 0, -1); yawEuler.current.set(0, euler.current.y, 0); md.applyEuler(yawEuler.current); md.multiplyScalar(speed)
       }
     } else {
-      if (!locked.current) { euler.current.y += (-mouse.current.x * 0.6 - euler.current.y) * 0.04; euler.current.x += (-mouse.current.y * 0.25 - euler.current.x) * 0.04 }
+      if (!locked.current && !isMobile.current) {
+        euler.current.y += (-mouse.current.x * 0.6 - euler.current.y) * 0.04
+        euler.current.x += (-mouse.current.y * 0.25 - euler.current.x) * 0.04
+      }
+
       md.set(0, 0, 0)
-      if (keys.current.has('ArrowUp') || keys.current.has('KeyW')) md.z -= 1
-      if (keys.current.has('ArrowDown') || keys.current.has('KeyS')) md.z += 1
-      if (keys.current.has('ArrowLeft') || keys.current.has('KeyA')) md.x -= 1
-      if (keys.current.has('ArrowRight') || keys.current.has('KeyD')) md.x += 1
-      if (md.lengthSq() > 0) { md.normalize(); yawEuler.current.set(0, euler.current.y, 0); md.applyEuler(yawEuler.current); md.multiplyScalar(CFG.moveSpeed) }
+
+      const mj = moveJoy.current
+      if (isMobile.current && mj.active) {
+        const dist = Math.sqrt(mj.dx * mj.dx + mj.dy * mj.dy)
+        if (dist > JOY_DEAD) {
+          const strength = Math.min(1, (dist - JOY_DEAD) / (JOY_MAX - JOY_DEAD))
+          md.set(mj.dx / dist, 0, mj.dy / dist)
+          yawEuler.current.set(0, euler.current.y, 0); md.applyEuler(yawEuler.current)
+          md.multiplyScalar(CFG.mobileSpeed * strength)
+        }
+      }
+
+      const lj = lookJoy.current
+      if (isMobile.current && lj.active) {
+        const dist = Math.sqrt(lj.dx * lj.dx + lj.dy * lj.dy)
+        if (dist > JOY_DEAD) {
+          const strength = Math.min(1, (dist - JOY_DEAD) / (JOY_MAX - JOY_DEAD))
+          euler.current.y -= (lj.dx / dist) * JOY_LOOK_SENS * strength * delta
+          euler.current.x -= (lj.dy / dist) * JOY_LOOK_SENS * strength * delta * 0.7
+          euler.current.x = Math.max(-1.2, Math.min(1.2, euler.current.x))
+        }
+      }
+
+      if (!isMobile.current) {
+        if (keys.current.has('ArrowUp') || keys.current.has('KeyW')) md.z -= 1
+        if (keys.current.has('ArrowDown') || keys.current.has('KeyS')) md.z += 1
+        if (keys.current.has('ArrowLeft') || keys.current.has('KeyA')) md.x -= 1
+        if (keys.current.has('ArrowRight') || keys.current.has('KeyD')) md.x += 1
+        if (md.lengthSq() > 0) { md.normalize(); yawEuler.current.set(0, euler.current.y, 0); md.applyEuler(yawEuler.current); md.multiplyScalar(CFG.moveSpeed) }
+      }
     }
+
     const blend = 1 - Math.exp(-(autoWalk.current ? 3 : 8) * delta)
     velocity.current.x += (md.x - velocity.current.x) * blend; velocity.current.z += (md.z - velocity.current.z) * blend
     camera.position.x += velocity.current.x * delta; camera.position.z += velocity.current.z * delta; camera.position.y = CFG.cameraHeight
+    if (camera.position.z < CLIFF_Z + 0.3) { camera.position.z = CLIFF_Z + 0.3; velocity.current.z = 0 }
     camera.quaternion.setFromEuler(euler.current)
+
+    // Update joystick visuals
+    const els = joyEls.current
+    if (els) {
+      const outerR = 45, innerR = 17
+      const show = (o: HTMLDivElement, i: HTMLDivElement, j: Joy) => {
+        if (j.active) {
+          o.style.display = 'block'; i.style.display = 'block'
+          o.style.left = `${j.ox - outerR}px`; o.style.top = `${j.oy - outerR}px`
+          const d = Math.sqrt(j.dx * j.dx + j.dy * j.dy)
+          const clamp = Math.min(outerR - innerR, d)
+          const a = d > 0.5 ? Math.atan2(j.dy, j.dx) : 0
+          i.style.left = `${j.ox + Math.cos(a) * clamp - innerR}px`
+          i.style.top = `${j.oy + Math.sin(a) * clamp - innerR}px`
+        } else { o.style.display = 'none'; i.style.display = 'none' }
+      }
+      show(els.mO, els.mI, moveJoy.current)
+      show(els.lO, els.lI, lookJoy.current)
+      els.mRest.style.opacity = moveJoy.current.active ? '0' : '1'
+      els.lRest.style.opacity = lookJoy.current.active ? '0' : '1'
+    }
   })
 
   return null
@@ -1046,10 +1359,12 @@ function TattooStencils() {
     for (let i = 0; i < STENCIL_COUNT; i++) {
       let x: number, z: number, tries = 0
       do {
-        const a = rng() * Math.PI * 2, dist = 6 + rng() * (CFG.initRadius - 6)
+        const a = rng() * Math.PI * 2, dist = 12 + rng() * (CFG.initRadius - 12)
         x = Math.cos(a) * dist; z = Math.sin(a) * dist
         tries++
-      } while (tries < 20 && arr.some(o => (o.x - x) ** 2 + (o.z - z) ** 2 < STENCIL_MIN_DIST ** 2))
+        const hx = x - CFG.houseX, hz = z - CFG.houseZ
+        if (hx * hx + hz * hz < CFG.houseR * CFG.houseR || onPath(x, z) || pastCliff(z)) continue
+      } while (tries < 30 && arr.some(o => (o.x - x) ** 2 + (o.z - z) ** 2 < STENCIL_MIN_DIST ** 2))
       arr.push({
         x, z,
         y: 1.5 + rng() * 3.5, scale: 4 + rng() * 4,
@@ -1076,10 +1391,21 @@ function TattooStencils() {
           const r = CFG.placeMin + Math.random() * (CFG.placeMax - CFG.placeMin)
           nx = cx + Math.cos(a) * r; nz = cz + Math.sin(a) * r
           tries++
-        } while (tries < 10 && data.some((o, j) => j !== i && (o.x - nx!) ** 2 + (o.z - nz!) ** 2 < STENCIL_MIN_DIST ** 2))
+          const hx = nx - CFG.houseX, hz = nz - CFG.houseZ
+          if (hx * hx + hz * hz < CFG.houseR * CFG.houseR || onPath(nx, nz) || pastCliff(nz)) continue
+        } while (tries < 15 && data.some((o, j) => j !== i && (o.x - nx!) ** 2 + (o.z - nz!) ** 2 < STENCIL_MIN_DIST ** 2))
         d.x = nx!; d.z = nz!
         d.y = 1.5 + Math.random() * 3.5
       }
+      const shx = d.x - CFG.houseX, shz = d.z - CFG.houseZ
+      if (shx * shx + shz * shz < CFG.houseR * CFG.houseR) {
+        const ha = Math.atan2(shz, shx)
+        d.x = CFG.houseX + Math.cos(ha) * (CFG.houseR + 2); d.z = CFG.houseZ + Math.sin(ha) * (CFG.houseR + 2)
+      }
+      if (onPath(d.x, d.z)) {
+        d.x = (d.x >= 0 ? 1 : -1) * (CFG.pathHalfW + 1)
+      }
+      if (pastCliff(d.z)) d.z = CLIFF_Z + 5
       grp.position.set(d.x, d.y + Math.sin(t * d.bobSpeed) * d.bobAmp, d.z)
       grp.rotation.y = d.rotOff + t * d.rotSpeed
       grp.scale.setScalar(d.scale)
@@ -1102,6 +1428,242 @@ function TattooStencils() {
   )
 }
 
+// ─── Sea Cliff (Faroe Islands basalt cliff) ─────────────
+function SeaCliff() {
+  const rockGeo = useMemo(() => {
+    const rng = mulberry32(5000)
+    const parts: THREE.BufferGeometry[] = []
+
+    const body = new THREE.BoxGeometry(CLIFF_W, CLIFF_H, CLIFF_DEPTH)
+    body.translate(0, -CLIFF_H / 2, CLIFF_Z - CLIFF_DEPTH / 2)
+    parts.push(body)
+
+    // Irregular cliff edge: segmented top with varying z offsets
+    const edgeSegs = 60
+    const segW = CLIFF_W / edgeSegs
+    for (let i = 0; i < edgeSegs; i++) {
+      const sx = -CLIFF_W / 2 + (i + 0.5) * segW
+      const zOff = Math.sin(sx * 0.35) * 1.5 + Math.sin(sx * 0.8 + 2) * 0.8 + Math.sin(sx * 0.15) * 2
+      const edgeH = 1.5 + rng() * 2.5
+      const edgeD = 1.0 + rng() * 1.5 + Math.max(0, zOff)
+      const g = new THREE.BoxGeometry(segW + 0.05, edgeH, edgeD)
+      g.translate(sx, -edgeH / 2, CLIFF_Z + edgeD / 2 - 0.5)
+      parts.push(g)
+    }
+
+    // Scattered boulders along the cliff edge for extra roughness
+    for (let i = 0; i < 40; i++) {
+      const bx = (rng() - 0.5) * CLIFF_W * 0.92
+      const zOff = Math.sin(bx * 0.35) * 1.5 + Math.sin(bx * 0.8 + 2) * 0.8 + Math.sin(bx * 0.15) * 2
+      const bw = 0.5 + rng() * 1.8
+      const bh = 0.3 + rng() * 1.2
+      const bd = 0.4 + rng() * 1.2
+      const g = new THREE.BoxGeometry(bw, bh, bd)
+      g.translate(bx, -bh * 0.6 - rng() * 0.3, CLIFF_Z + zOff * 0.6 + rng() * 1.2)
+      parts.push(g)
+    }
+
+    // Rocky face detail
+    for (let i = 0; i < 300; i++) {
+      const w = 0.8 + rng() * 3
+      const h = 0.4 + rng() * 3.5
+      const d = 0.2 + rng() * 1.2
+      const fx = (rng() - 0.5) * CLIFF_W * 0.96
+      const zOff = Math.sin(fx * 0.35) * 0.8 + Math.sin(fx * 0.8 + 2) * 0.5
+      const g = new THREE.BoxGeometry(w, h, d)
+      g.translate(fx, -rng() * CLIFF_H * 0.95, CLIFF_Z + d / 2 + rng() * 0.3 + zOff * 0.3)
+      parts.push(g)
+    }
+
+    // Ledges and overhangs
+    for (let i = 0; i < 50; i++) {
+      const w = 1 + rng() * 4
+      const h = 0.12 + rng() * 0.3
+      const d = 0.4 + rng() * 1.5
+      const g = new THREE.BoxGeometry(w, h, d)
+      g.translate(
+        (rng() - 0.5) * CLIFF_W * 0.9,
+        -rng() * CLIFF_H * 0.85 - 1,
+        CLIFF_Z + d / 2
+      )
+      parts.push(g)
+    }
+
+    return mergeGeoms(parts)
+  }, [])
+
+  const grassGeo = useMemo(() => {
+    const rng = mulberry32(5100)
+    const parts: THREE.BufferGeometry[] = []
+    for (let i = 0; i < 150; i++) {
+      const h = 0.08 + rng() * 0.28
+      const w = 0.04 + rng() * 0.08
+      const d = 0.03 + rng() * 0.06
+      const g = new THREE.BoxGeometry(w, h, d)
+      g.translate(
+        (rng() - 0.5) * CLIFF_W * 0.95,
+        1.4 + h / 2,
+        CLIFF_Z + 0.3 + rng() * 2
+      )
+      parts.push(g)
+    }
+    return mergeGeoms(parts)
+  }, [])
+
+  const rockMat = useMemo(() => new THREE.MeshStandardMaterial({ color: 0x1a1a1e, roughness: 0.96, metalness: 0.02 }), [])
+  const grassMat = useMemo(() => new THREE.MeshStandardMaterial({ color: 0x141e10, roughness: 0.95 }), [])
+
+  return (
+    <group>
+      <mesh geometry={rockGeo} material={rockMat} castShadow receiveShadow />
+      <mesh geometry={grassGeo} material={grassMat} />
+    </group>
+  )
+}
+
+// ─── Ocean (animated waves) ──────────────────────────────
+function Ocean() {
+  const ref = useRef<THREE.Mesh>(null!)
+
+  const geo = useMemo(() => {
+    const g = new THREE.PlaneGeometry(160, 120, 80, 60)
+    g.rotateX(-Math.PI / 2)
+    return g
+  }, [])
+
+  const mat = useMemo(() => new THREE.MeshStandardMaterial({
+    color: 0x0a1520, roughness: 0.3, metalness: 0.6,
+    emissive: 0x040810, emissiveIntensity: 0.3,
+  }), [])
+
+  useFrame(({ clock }) => {
+    if (!ref.current) return
+    const t = clock.elapsedTime
+    const pos = ref.current.geometry.attributes.position
+    const arr = pos.array as Float32Array
+    for (let i = 0; i < pos.count; i++) {
+      const x = arr[i * 3], z = arr[i * 3 + 2]
+      arr[i * 3 + 1] =
+        Math.sin(x * 0.08 + t * 0.6) * 0.8 +
+        Math.sin(z * 0.05 + t * 0.4) * 1.2 +
+        Math.sin(x * 0.15 + z * 0.1 + t * 0.9) * 0.4 +
+        Math.sin(x * 0.25 + t * 1.5) * 0.15
+    }
+    pos.needsUpdate = true
+    ref.current.geometry.computeVertexNormals()
+  })
+
+  return <mesh ref={ref} geometry={geo} material={mat} position={[0, OCEAN_Y, CLIFF_Z - 55]} />
+}
+
+// ─── Sea Stacks (basalt pillars in the ocean) ────────────
+function SeaStacks() {
+  const geo = useMemo(() => {
+    const rng = mulberry32(6000)
+    const parts: THREE.BufferGeometry[] = []
+    const stacks = [
+      { x: -15, z: -75, w: 3, d: 3, h: 18 },
+      { x: 8, z: -82, w: 4, d: 3.5, h: 22 },
+      { x: -25, z: -88, w: 2.5, d: 2.5, h: 15 },
+      { x: 20, z: -70, w: 3.5, d: 3, h: 20 },
+      { x: -8, z: -95, w: 2, d: 2, h: 12 },
+      { x: 30, z: -90, w: 3, d: 4, h: 25 },
+    ]
+
+    for (const st of stacks) {
+      const body = new THREE.BoxGeometry(st.w, st.h, st.d)
+      body.translate(st.x, OCEAN_Y - st.h / 2 + 6, st.z)
+      parts.push(body)
+
+      for (let j = 0; j < 25; j++) {
+        const w = 0.3 + rng() * 1, h = 0.3 + rng() * 1.5, d = 0.2 + rng() * 0.8
+        const angle = rng() * Math.PI * 2
+        const dist = st.w * 0.4 + rng() * 0.5
+        const g = new THREE.BoxGeometry(w, h, d)
+        g.translate(
+          st.x + Math.cos(angle) * dist,
+          OCEAN_Y - st.h / 2 + 6 + (rng() - 0.5) * st.h * 0.8,
+          st.z + Math.sin(angle) * dist
+        )
+        parts.push(g)
+      }
+    }
+
+    return mergeGeoms(parts)
+  }, [])
+
+  const mat = useMemo(() => new THREE.MeshStandardMaterial({ color: 0x1c1c20, roughness: 0.96, metalness: 0.02 }), [])
+  return <mesh geometry={geo} material={mat} castShadow />
+}
+
+// ─── Seagulls (circling above the ocean) ─────────────────
+function Seagulls({ count = 14 }: { count?: number }) {
+  const ref = useRef<THREE.InstancedMesh>(null!)
+
+  const wingGeo = useMemo(() => {
+    const parts: THREE.BufferGeometry[] = []
+    const lw = new THREE.PlaneGeometry(0.35, 0.08)
+    lw.rotateZ(0.25); lw.translate(-0.15, 0, 0)
+    parts.push(lw)
+    const rw = new THREE.PlaneGeometry(0.35, 0.08)
+    rw.rotateZ(-0.25); rw.translate(0.15, 0, 0)
+    parts.push(rw)
+    const b = new THREE.BoxGeometry(0.04, 0.03, 0.15)
+    parts.push(b)
+    return mergeGeoms(parts)
+  }, [])
+
+  const mat = useMemo(() => new THREE.MeshStandardMaterial({
+    color: 0xcccccc, roughness: 0.8, side: THREE.DoubleSide,
+    emissive: 0x222222, emissiveIntensity: 0.3,
+  }), [])
+
+  const data = useMemo(() => {
+    const rng = mulberry32(7000)
+    return Array.from({ length: count }, () => ({
+      cx: (rng() - 0.5) * 50,
+      cz: CLIFF_Z - 20 - rng() * 40,
+      cy: OCEAN_Y + 8 + rng() * 15,
+      radius: 5 + rng() * 12,
+      speed: 0.15 + rng() * 0.25,
+      phase: rng() * Math.PI * 2,
+      flapSpeed: 2.5 + rng() * 2,
+      flapAmp: 0.15 + rng() * 0.1,
+      bobAmp: 0.5 + rng() * 1,
+      bobSpeed: 0.3 + rng() * 0.3,
+      scale: 0.8 + rng() * 0.6,
+    }))
+  }, [count])
+
+  const sc = useMemo(() => ({
+    m: new THREE.Matrix4(), q: new THREE.Quaternion(),
+    s: new THREE.Vector3(), p: new THREE.Vector3(), e: new THREE.Euler(),
+  }), [])
+
+  useFrame(({ clock }) => {
+    if (!ref.current) return
+    const t = clock.elapsedTime
+    const { m, q, s, p, e } = sc
+    for (let i = 0; i < count; i++) {
+      const d = data[i]
+      const angle = d.phase + t * d.speed
+      p.set(
+        d.cx + Math.cos(angle) * d.radius,
+        d.cy + Math.sin(t * d.bobSpeed + d.phase) * d.bobAmp,
+        d.cz + Math.sin(angle) * d.radius
+      )
+      e.set(Math.sin(t * d.flapSpeed + d.phase * 3) * d.flapAmp, angle + Math.PI / 2, 0)
+      q.setFromEuler(e)
+      s.setScalar(d.scale)
+      m.compose(p, q, s)
+      ref.current.setMatrixAt(i, m)
+    }
+    ref.current.instanceMatrix.needsUpdate = true
+  })
+
+  return <instancedMesh ref={ref} args={[wingGeo, mat, count]} frustumCulled={false} />
+}
+
 // ─── Scene Setup ────────────────────────────────────────
 function SceneSetup() {
   const { scene } = useThree()
@@ -1112,15 +1674,16 @@ function SceneSetup() {
 // ─── Main Export ────────────────────────────────────────
 export default function ForestScene({ onInteract }: { onInteract?: () => void }) {
   const treeGeos = useMemo(() => TREE_PRESETS.map((p) => createTree(p)), [])
+  const pineGeos = useMemo(() => PINE_PRESETS.map((p) => createPineTree(p)), [])
   const fernGeo = useMemo(() => createFern(), [])
   const bushGeo = useMemo(() => createBush(), [])
 
   return (
     <Canvas
       shadows
-      camera={{ fov: 65, near: 0.1, far: 150, position: [0, CFG.cameraHeight, 0] }}
+      camera={{ fov: 65, near: 0.1, far: 200, position: [0, CFG.cameraHeight, 0] }}
       dpr={[1, 1.5]}
-      gl={{ antialias: true, alpha: false }}
+      gl={{ antialias: true, alpha: false, localClippingEnabled: true }}
       style={{ position: 'absolute', inset: 0 }}
     >
       <SceneSetup />
@@ -1129,14 +1692,20 @@ export default function ForestScene({ onInteract }: { onInteract?: () => void })
       <ambientLight intensity={0.04} color={0x6688aa} />
       <Moon />
       <Stars />
+      <LogoConstellation />
       <Clouds />
 
-      {/* Trees — 5 variants, cast shadows, gentle wind */}
+      {/* Trees — 5 deciduous variants + 3 pine variants */}
       <FloraInstances geometry={treeGeos[0]} color={CFG.treeColor} count={55} seed={100} scaleRange={[0.6, 1.6]} windAmp={0.015} windFreq={1.2} castShadow />
       <FloraInstances geometry={treeGeos[1]} color={CFG.treeColor} count={45} seed={200} scaleRange={[0.5, 1.3]} windAmp={0.012} windFreq={1.0} castShadow />
       <FloraInstances geometry={treeGeos[2]} color={CFG.treeColor} count={55} seed={300} scaleRange={[0.6, 1.5]} windAmp={0.02} windFreq={1.5} castShadow />
       <FloraInstances geometry={treeGeos[3]} color={CFG.treeColor} count={40} seed={400} scaleRange={[0.5, 1.2]} windAmp={0.01} windFreq={0.9} castShadow />
       <FloraInstances geometry={treeGeos[4]} color={CFG.treeColor} count={50} seed={500} scaleRange={[0.7, 1.8]} windAmp={0.018} windFreq={1.3} castShadow />
+
+      {/* Pine trees */}
+      <FloraInstances geometry={pineGeos[0]} color={CFG.pineColor} count={18} seed={810} scaleRange={[0.5, 1.4]} windAmp={0.008} windFreq={0.9} castShadow />
+      <FloraInstances geometry={pineGeos[1]} color={CFG.pineColor} count={15} seed={820} scaleRange={[0.6, 1.5]} windAmp={0.01} windFreq={1.0} castShadow />
+      <FloraInstances geometry={pineGeos[2]} color={CFG.pineColor} count={12} seed={830} scaleRange={[0.4, 1.2]} windAmp={0.006} windFreq={0.8} castShadow />
 
       {/* Undergrowth */}
       <FloraInstances geometry={fernGeo} color={CFG.fernColor} count={120} seed={600} scaleRange={[0.4, 1.2]} windAmp={0.12} windFreq={2.0} />
@@ -1147,6 +1716,10 @@ export default function ForestScene({ onInteract }: { onInteract?: () => void })
       <Fox />
       <TattooStencils />
       <Ground />
+      <SeaCliff />
+      <Ocean />
+      <SeaStacks />
+      <Seagulls />
       <FallingLeaves count={300} />
       <Snow count={2500} />
       <Mist count={200} />

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
 import { getDb, UPLOADS_DIR } from "@/lib/db";
-import { getAllImages, FOLDER_IDS } from "@/lib/images";
+import { getAllImages, getFolderIds } from "@/lib/images";
 import { v4 as uuid } from "uuid";
 import path from "path";
 import fs from "fs";
@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
     const files = formData.getAll("files") as File[];
     const folder = (formData.get("folder") as string) || "unsorted";
 
-    if (!FOLDER_IDS.includes(folder as typeof FOLDER_IDS[number])) {
+    if (!getFolderIds().includes(folder)) {
       return NextResponse.json({ error: "Invalid folder" }, { status: 400 });
     }
 

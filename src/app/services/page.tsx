@@ -1,6 +1,9 @@
 import Link from "next/link";
 import Image from "next/image";
+import { getContentBulk } from "@/lib/content";
 import s from "./page.module.scss";
+
+export const dynamic = "force-dynamic";
 
 const STYLES = [
   {
@@ -49,16 +52,27 @@ const STEPS = [
 ];
 
 export default function ServicesPage() {
+  const c = getContentBulk([
+    "services.hero_title",
+    "services.hero_sub",
+    "services.piercing_text",
+    "services.price_consultation",
+    "services.price_minimum",
+    "services.price_hourly",
+    "services.price_piercing",
+    "services.price_note",
+    "services.cta_heading",
+    "services.cta_text",
+  ]);
+
   return (
     <>
       {/* Hero */}
       <section className={s.hero}>
         <div className={s.heroInner}>
           <p className={s.sectionLabel}>Services</p>
-          <h1 className={s.heroTitle}>Alt hvad vi tilbyder</h1>
-          <p className={s.heroSub}>
-            I vores private studie i Svendborg
-          </p>
+          <h1 className={s.heroTitle}>{c["services.hero_title"]}</h1>
+          <p className={s.heroSub}>{c["services.hero_sub"]}</p>
         </div>
       </section>
 
@@ -95,11 +109,7 @@ export default function ServicesPage() {
           <p className={s.sectionLabel}>Piercing</p>
           <h2 className={s.sectionTitle}>Professionel piercing</h2>
           <div className={s.piercingCard}>
-            <p className={s.piercingText}>
-              Vi udfører professionel piercing med kvalitetssmykker i et trygt
-              og sterilt miljø. Alle piercinger inkluderer et startsmykke i
-              titanium og en grundig vejledning i efterpleje.
-            </p>
+            <p className={s.piercingText}>{c["services.piercing_text"]}</p>
             <Link href="/aftercare" className={s.ghostLink}>
               Læs om piercing efterpleje
             </Link>
@@ -115,23 +125,21 @@ export default function ServicesPage() {
           <div className={s.pricingCard}>
             <div className={s.priceRow}>
               <span className={s.priceLabel}>Konsultation</span>
-              <span className={s.priceValue}>Gratis</span>
+              <span className={s.priceValue}>{c["services.price_consultation"]}</span>
             </div>
             <div className={s.priceRow}>
               <span className={s.priceLabel}>Minimum</span>
-              <span className={s.priceValue}>800 kr</span>
+              <span className={s.priceValue}>{c["services.price_minimum"]}</span>
             </div>
             <div className={s.priceRow}>
               <span className={s.priceLabel}>Timepris</span>
-              <span className={s.priceValue}>1.200 kr</span>
+              <span className={s.priceValue}>{c["services.price_hourly"]}</span>
             </div>
             <div className={s.priceRow}>
               <span className={s.priceLabel}>Piercing fra</span>
-              <span className={s.priceValue}>400 kr</span>
+              <span className={s.priceValue}>{c["services.price_piercing"]}</span>
             </div>
-            <p className={s.priceNote}>
-              Inkl. smykke. Endelig pris aftales altid på forhånd.
-            </p>
+            <p className={s.priceNote}>{c["services.price_note"]}</p>
           </div>
         </div>
       </section>
@@ -156,10 +164,8 @@ export default function ServicesPage() {
       {/* CTA */}
       <section className={s.cta}>
         <div className={s.ctaInner}>
-          <h2 className={s.ctaHeading}>Klar til at komme i gang?</h2>
-          <p className={s.ctaText}>
-            Book en gratis konsultation og lad os finde dit design sammen.
-          </p>
+          <h2 className={s.ctaHeading}>{c["services.cta_heading"]}</h2>
+          <p className={s.ctaText}>{c["services.cta_text"]}</p>
           <Link href="/booking" className={s.ctaBtn}>
             Book en tid
           </Link>

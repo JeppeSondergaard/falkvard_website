@@ -7,7 +7,8 @@ import s from "./AdminNav.module.scss";
 const NAV_ITEMS = [
   { href: "/admin/dashboard", label: "Bookings" },
   { href: "/admin/images", label: "Billeder" },
-  { href: "/admin/stencils", label: "Stencils" },
+  { href: "/admin/content", label: "Indhold" },
+  { href: "/admin/stencils", label: "3D World Stencils" },
 ];
 
 export default function AdminNav() {

@@ -56,14 +56,28 @@ function ChatPanel() {
       (el as unknown as Record<string, CallableFunction>).setOptions({
         api: { getClientSecret },
         async onClientTool({ name, params }: { name: string; params: Record<string, unknown> }) {
+          console.log("[onClientTool] Called:", name, JSON.stringify(params, null, 2));
           if (name === "create_booking") {
-            const res = await fetch("/api/agent/booking", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(params),
-            });
-            return res.json();
+            try {
+              const res = await fetch("/api/agent/booking", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(params),
+              });
+              console.log("[create_booking] Response status:", res.status);
+              const data = await res.json();
+              console.log("[create_booking] Response data:", JSON.stringify(data));
+              if (!res.ok) {
+                console.error("[create_booking] Error:", res.status, data);
+                return { success: false, error: data.error || "Booking fejlede" };
+              }
+              return data;
+            } catch (err) {
+              console.error("[create_booking] Fetch error:", err);
+              return { success: false, error: String(err) };
+            }
           }
+          console.warn("[onClientTool] Unknown tool:", name);
           throw new Error(`Unknown tool: ${name}`);
         },
         theme: {
@@ -79,14 +93,10 @@ function ChatPanel() {
         },
         locale: "da-DK",
         history: { enabled: false },
-        header: { title: "Få inspiration til din næste tattoo" },
+        header: { title: { text: "Få inspiration til din næste tattoo" } },
         startScreen: {
-          greeting: "Hej! Jeg er Falkvard Tattoo's booking assistent. Hvad kan jeg hjælpe dig med?",
-          prompts: [
-            { label: "Book en tatovering", prompt: "Jeg vil gerne booke en tid til en tatovering", icon: "write" },
-            { label: "Se stilarter", prompt: "Hvilke stilarter tilbyder I?", icon: "search" },
-            { label: "Priser og info", prompt: "Hvad koster en tatovering?", icon: "info" },
-          ],
+          greeting: "Hej. Jeg er Andreas kreative tatoveringsassistent. Lad os udvikle sammen. Har du en idé til en tatovering du vil dele med mig?",
+          prompts: [],
         },
         composer: {
           placeholder: "Skriv din besked...",

@@ -1,0 +1,433 @@
+@use "../../styles/variables" as *;
+@use "../../styles/typography" as t;
+
+/* ═══════════════════════════════════════════════════
+   C20A 3D Gallery – Overlay Styles
+   ═══════════════════════════════════════════════════ */
+
+.wrap {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: #080808;
+  touch-action: none;
+  user-select: none;
+  z-index: 9999;
+
+  canvas {
+    display: block;
+    touch-action: none;
+  }
+}
+
+/* ── Intro Overlay ──────────────────────────────── */
+
+.intro {
+  position: absolute;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #080808;
+  color: #fff;
+  cursor: pointer;
+  transition: opacity 1s ease;
+  -webkit-tap-highlight-color: transparent;
+
+  &.hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .introTitle {
+    font-family: t.$font-stack;
+    font-weight: 700;
+    font-size: clamp(2.5rem, 8vw, 5rem);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    text-shadow: 0 0 40px rgba(204, 204, 204, 0.3),
+      0 0 80px rgba(204, 204, 204, 0.1);
+    margin-bottom: $space-2;
+  }
+
+  .introSub {
+    font-family: t.$font-stack;
+    font-size: clamp(0.85rem, 2.5vw, 1.1rem);
+    color: var(--text-muted);
+    max-width: 380px;
+    text-align: center;
+    line-height: 1.6;
+    margin-bottom: $space-6;
+  }
+
+  .introHint {
+    display: flex;
+    align-items: center;
+    gap: $space-2;
+    padding: $space-3 $space-4;
+    border: 1px solid var(--border);
+    border-radius: $radius-md;
+    font-family: t.$font-stack;
+    font-size: t.$type-sm;
+    color: var(--text-muted);
+    animation: pulse 2.5s ease-in-out infinite;
+
+    kbd {
+      display: inline-block;
+      padding: 2px $space-2;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: $radius-sm;
+      font-family: t.$font-stack;
+      font-size: t.$type-xs;
+    }
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* ── Crosshair ──────────────────────────────────── */
+
+.crosshair {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  z-index: 10;
+  pointer-events: none;
+
+  &::before,
+  &::after {
+    content: "";
+    position: absolute;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 1px;
+  }
+
+  &::before {
+    width: 2px;
+    height: 14px;
+    left: -1px;
+    top: -7px;
+  }
+
+  &::after {
+    width: 14px;
+    height: 2px;
+    left: -7px;
+    top: -1px;
+  }
+}
+
+/* ── Artwork Info Panel ─────────────────────────── */
+
+.panel {
+  position: absolute;
+  bottom: $space-5;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 50;
+  background: rgba(10, 10, 10, 0.88);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border-subtle);
+  border-radius: $radius-lg;
+  padding: $space-3 $space-4;
+  min-width: 300px;
+  max-width: 90vw;
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+  transition: opacity $transition-base, transform $transition-base;
+
+  &.hidden {
+    opacity: 0;
+    transform: translateX(-50%) translateY(16px);
+    pointer-events: none;
+  }
+
+  .panelInfo {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .panelName {
+    font-family: t.$font-stack;
+    font-weight: 700;
+    font-size: t.$type-md;
+    color: var(--text-primary);
+    margin: 0 0 $space-1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .panelPrice {
+    font-family: t.$font-stack;
+    font-size: t.$type-base;
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  .panelNav {
+    font-family: t.$font-stack;
+    font-size: t.$type-xs;
+    color: var(--text-muted);
+    margin-top: $space-1;
+  }
+
+  .buyLink {
+    flex-shrink: 0;
+    padding: $space-2 $space-4;
+    background: var(--accent);
+    color: var(--bg-primary);
+    font-family: t.$font-stack;
+    font-weight: 700;
+    font-size: t.$type-sm;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    text-decoration: none;
+    border: none;
+    border-radius: $radius-md;
+    cursor: pointer;
+    transition: background $transition-fast, transform 0.1s ease;
+
+    &:hover {
+      background: var(--accent-hover);
+      transform: scale(1.05);
+    }
+
+    &:active {
+      transform: scale(0.97);
+    }
+  }
+
+  .panelClose {
+    position: absolute;
+    top: -$space-1;
+    right: -$space-1;
+    width: 24px;
+    height: 24px;
+    border-radius: $radius-full;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: t.$type-xs;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background $transition-fast;
+
+    &:hover {
+      background: var(--bg-surface);
+    }
+  }
+}
+
+/* ── Space Hint (during roam) ───────────────────── */
+
+.spaceHint {
+  position: absolute;
+  bottom: $space-4;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 40;
+  font-family: t.$font-stack;
+  font-size: t.$type-xs;
+  color: var(--text-muted);
+  pointer-events: none;
+  white-space: nowrap;
+  animation: pulse 3s ease-in-out infinite;
+
+  kbd {
+    display: inline-block;
+    padding: 1px $space-1;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: $radius-sm;
+    margin: 0 2px;
+    font-family: t.$font-stack;
+    font-size: t.$type-xs;
+  }
+}
+
+/* ── 3D Price Tags (Html from drei) ─────────────── */
+
+.tag3d {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $space-1;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.tagName {
+  font-family: t.$font-stack;
+  font-weight: 700;
+  font-size: 11px;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8);
+}
+
+.tagPrice {
+  font-family: t.$font-stack;
+  font-size: 10px;
+  color: var(--accent);
+  font-weight: 700;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+}
+
+.tagBuy {
+  display: inline-block;
+  padding: 3px 10px;
+  background: var(--accent);
+  color: var(--bg-primary);
+  font-family: t.$font-stack;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border-radius: $radius-sm;
+  text-decoration: none;
+  pointer-events: auto;
+  cursor: pointer;
+  transition: background $transition-fast;
+
+  &:hover {
+    background: var(--accent-hover);
+  }
+}
+
+/* ── Mobile Controls ────────────────────────────── */
+
+.mobileUI {
+  display: none;
+
+  @media (pointer: coarse) {
+    display: block;
+  }
+}
+
+.joystickZone {
+  position: absolute;
+  bottom: $space-5;
+  left: $space-4;
+  width: 130px;
+  height: 130px;
+  z-index: 60;
+  touch-action: none;
+}
+
+.joystickBase {
+  width: 130px;
+  height: 130px;
+  border-radius: $radius-full;
+  border: 2px solid var(--border);
+  background: var(--bg-elevated);
+  position: relative;
+}
+
+.joystickKnob {
+  width: 52px;
+  height: 52px;
+  border-radius: $radius-full;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid var(--border);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  pointer-events: none;
+}
+
+.lookZone {
+  position: absolute;
+  inset: 0 0 0 40%;
+  z-index: 55;
+  touch-action: none;
+}
+
+.nextBtn {
+  position: absolute;
+  bottom: $space-5;
+  right: $space-4;
+  width: 64px;
+  height: 64px;
+  border-radius: $radius-full;
+  border: 2px solid var(--accent-border);
+  background: var(--accent-subtle);
+  z-index: 60;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+
+  @media (pointer: coarse) {
+    display: flex;
+  }
+
+  span {
+    font-family: t.$font-stack;
+    font-size: t.$type-xs;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    text-align: center;
+    line-height: 1.2;
+  }
+
+  &:active {
+    background: var(--ornamental-subtle);
+    border-color: var(--accent);
+  }
+}
+
+/* ── Loading ────────────────────────────────────── */
+
+.loader {
+  position: absolute;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #080808;
+  transition: opacity 0.6s ease;
+
+  &.hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: $radius-full;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

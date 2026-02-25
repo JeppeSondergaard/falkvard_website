@@ -16,11 +16,12 @@ export default function LandingPage() {
   const [phase, setPhase] = useState(0)
   const [fadeDark, setFadeDark] = useState(true)
   const [exploring, setExploring] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
   const timersRef = useRef<ReturnType<typeof setTimeout>[]>([])
 
   const handleContinue = useCallback(() => {
     setFadeDark(true)
-    setTimeout(() => router.push('/home'), 2200)
+    setTimeout(() => router.push('/home'), 1000)
   }, [router])
 
   const handleInteract = useCallback(() => {
@@ -34,14 +35,24 @@ export default function LandingPage() {
       return
     }
 
+    setIsMobile('ontouchstart' in window)
+
+    const preventScroll = (e: TouchEvent) => e.preventDefault()
+    document.addEventListener('touchmove', preventScroll, { passive: false })
+    document.body.style.overflow = 'hidden'
+    document.documentElement.style.overflow = 'hidden'
+
     const t: ReturnType<typeof setTimeout>[] = []
-    t.push(setTimeout(() => setFadeDark(false), 300))
-    t.push(setTimeout(() => setPhase(1), 1000))
-    t.push(setTimeout(() => setPhase(2), 2800))
-    t.push(setTimeout(() => setPhase(3), 4800))
-    t.push(setTimeout(() => setPhase(5), 6000))
+    t.push(setTimeout(() => setFadeDark(false), 500))
+    t.push(setTimeout(() => setPhase(1), 800))
+    t.push(setTimeout(() => { setExploring(true); setPhase(5) }, 4800))
     timersRef.current = t
-    return () => t.forEach(clearTimeout)
+    return () => {
+      t.forEach(clearTimeout)
+      document.removeEventListener('touchmove', preventScroll)
+      document.body.style.overflow = ''
+      document.documentElement.style.overflow = ''
+    }
   }, [])
 
   useEffect(() => {
@@ -65,43 +76,27 @@ export default function LandingPage() {
       <div className={styles.vignette} />
       <div className={`${styles.fadeOverlay} ${fadeDark ? styles.fadeDarkActive : ''}`} />
 
-      <AnimatePresence>
-        {phase < 5 && (
-          <motion.div
-            className={styles.overlay}
-            initial={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 1.5 }}
-          >
-            <motion.h1
-              className={styles.title}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: phase >= 1 ? 1 : 0, y: phase >= 1 ? 0 : 20 }}
-              transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-            >
-              FALKVARD
-            </motion.h1>
-
-            <motion.p
-              className={styles.subtitle}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: phase >= 2 ? 0.6 : 0 }}
+      {!isMobile && (
+        <AnimatePresence>
+          {phase < 5 && (
+            <motion.div
+              className={styles.overlay}
+              initial={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
               transition={{ duration: 1.2 }}
             >
-              TATOVERINGER MED SJÆL
-            </motion.p>
-
-            <motion.p
-              className={styles.hint}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: phase >= 3 ? 0.4 : 0 }}
-              transition={{ duration: 1.2 }}
-            >
-              Arrow keys to explore &middot; Click to look around
-            </motion.p>
-          </motion.div>
-        )}
-      </AnimatePresence>
+              <motion.p
+                className={styles.hint}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: phase >= 1 ? 0.45 : 0 }}
+                transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
+              >
+                Arrow keys to explore · Click to look around
+              </motion.p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      )}
 
       <motion.button
         className={styles.continueButton}
@@ -114,19 +109,16 @@ export default function LandingPage() {
         Fortsæt &rarr;
       </motion.button>
 
-      <AnimatePresence>
-        {exploring && (
-          <motion.p
-            className={styles.controlsReminder}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 0.35 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.8 }}
-          >
-            ESC to release cursor
-          </motion.p>
-        )}
-      </AnimatePresence>
+      {exploring && !isMobile && (
+        <motion.p
+          className={styles.controlsReminder}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.3 }}
+          transition={{ duration: 0.8 }}
+        >
+          ESC to release cursor
+        </motion.p>
+      )}
 
       <span className={styles.srOnly}>
         Interactive 3D winter forest experience. Use arrow keys to move and mouse to look around.

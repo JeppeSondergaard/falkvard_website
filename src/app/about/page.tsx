@@ -1,18 +1,41 @@
 import Link from "next/link";
 import Image from "next/image";
+import { getContentBulk } from "@/lib/content";
 import s from "./page.module.scss";
 
+export const dynamic = "force-dynamic";
+
 export default function AboutPage() {
+  const c = getContentBulk([
+    "about.hero_heading",
+    "about.hero_intro",
+    "about.profile_image",
+    "about.artist_heading",
+    "about.artist_text",
+    "about.quote_text",
+    "about.value_1_title",
+    "about.value_1_desc",
+    "about.value_2_title",
+    "about.value_2_desc",
+    "about.value_3_title",
+    "about.value_3_desc",
+    "about.booking_heading",
+    "about.booking_steps",
+    "about.cta_heading",
+  ]);
+
+  let bookingSteps: string[] = [];
+  try {
+    bookingSteps = JSON.parse(c["about.booking_steps"]);
+  } catch { /* use empty */ }
+
   return (
     <>
       {/* Hero */}
       <section className={s.hero}>
         <div className={s.heroInner}>
-          <h1 className={s.heroHeading}>Om Falkvard Tattoo</h1>
-          <p className={s.heroIntro}>
-            Hej allesammen 🖤 Jeg har åbent efter aftale, da jeg driver et privat
-            studie og ikke en butik eller shop.
-          </p>
+          <h1 className={s.heroHeading}>{c["about.hero_heading"]}</h1>
+          <p className={s.heroIntro}>{c["about.hero_intro"]}</p>
         </div>
       </section>
 
@@ -21,8 +44,8 @@ export default function AboutPage() {
         <div className={s.artistStoryInner}>
           <div className={s.artistImagePlaceholder}>
             <Image
-              src="/gallery/profile.jpg"
-              alt="A Falkvard Tattoo"
+              src={c["about.profile_image"]}
+              alt="Andrea Falkvard"
               width={320}
               height={320}
               unoptimized
@@ -30,13 +53,8 @@ export default function AboutPage() {
             />
           </div>
           <div className={s.artistStoryContent}>
-            <h2 className={s.artistStoryHeading}>Historien bag studiet</h2>
-            <p className={s.artistStoryText}>
-              I mit private studie er kunden altid i centrum. Det vigtigste for
-              mig er, at du føler dig tryg, hørt og set gennem hele processen.
-              Jeg er her for at hjælpe dig med at finde det rette design, der
-              passer til dig og din historie.
-            </p>
+            <h2 className={s.artistStoryHeading}>{c["about.artist_heading"]}</h2>
+            <p className={s.artistStoryText}>{c["about.artist_text"]}</p>
           </div>
         </div>
       </section>
@@ -46,28 +64,21 @@ export default function AboutPage() {
         <div className={s.philosophyInner}>
           <blockquote className={s.quoteBlock}>
             <p className={s.quoteText}>
-              &ldquo;Det vigtigste for mig er, at du føler dig tryg, hørt og set
-              gennem hele processen.&rdquo;
+              &ldquo;{c["about.quote_text"]}&rdquo;
             </p>
           </blockquote>
           <div className={s.valuesGrid}>
             <div className={s.valueItem}>
-              <h3 className={s.valueTitle}>Tryghed</h3>
-              <p className={s.valueDesc}>
-                Dit private rum, din trygge oplevelse
-              </p>
+              <h3 className={s.valueTitle}>{c["about.value_1_title"]}</h3>
+              <p className={s.valueDesc}>{c["about.value_1_desc"]}</p>
             </div>
             <div className={s.valueItem}>
-              <h3 className={s.valueTitle}>Håndværk</h3>
-              <p className={s.valueDesc}>
-                Omhyggelig teknik, unikke designs
-              </p>
+              <h3 className={s.valueTitle}>{c["about.value_2_title"]}</h3>
+              <p className={s.valueDesc}>{c["about.value_2_desc"]}</p>
             </div>
             <div className={s.valueItem}>
-              <h3 className={s.valueTitle}>Sjæl</h3>
-              <p className={s.valueDesc}>
-                Personlig forbindelse, meningsfulde tatoveringer
-              </p>
+              <h3 className={s.valueTitle}>{c["about.value_3_title"]}</h3>
+              <p className={s.valueDesc}>{c["about.value_3_desc"]}</p>
             </div>
           </div>
         </div>
@@ -76,32 +87,14 @@ export default function AboutPage() {
       {/* Private Studio */}
       <section className={s.privateStudio}>
         <div className={s.privateStudioInner}>
-          <h2 className={s.privateStudioHeading}>
-            Sådan booker du en tid til en tatovering hos mig:
-          </h2>
+          <h2 className={s.privateStudioHeading}>{c["about.booking_heading"]}</h2>
           <ul className={s.benefitsList}>
-            <li className={s.benefitItem}>
-              <span className={s.benefitNum}>1</span>
-              <span className={s.benefitText}>Velkommen – fedt at du har fundet mig!</span>
-            </li>
-            <li className={s.benefitItem}>
-              <span className={s.benefitNum}>2</span>
-              <span className={s.benefitText}>Find din inspiration.</span>
-            </li>
-            <li className={s.benefitItem}>
-              <span className={s.benefitNum}>3</span>
-              <span className={s.benefitText}>Send en forespørgsel.</span>
-            </li>
-            <li className={s.benefitItem}>
-              <span className={s.benefitNum}>4</span>
-              <span className={s.benefitText}>Vi designer sammen.</span>
-            </li>
-            <li className={s.benefitItem}>
-              <span className={s.benefitNum}>5</span>
-              <span className={s.benefitText}>
-                Bliv tatoveret i trygge rammer.
-              </span>
-            </li>
+            {bookingSteps.map((step, i) => (
+              <li key={i} className={s.benefitItem}>
+                <span className={s.benefitNum}>{i + 1}</span>
+                <span className={s.benefitText}>{step}</span>
+              </li>
+            ))}
           </ul>
         </div>
       </section>
@@ -109,9 +102,7 @@ export default function AboutPage() {
       {/* CTA */}
       <section className={s.cta}>
         <div className={s.ctaInner}>
-          <h2 className={s.ctaHeading}>
-            Lad os snakke om dit næste projekt
-          </h2>
+          <h2 className={s.ctaHeading}>{c["about.cta_heading"]}</h2>
           <Link href="/booking" className={s.ctaBtn}>
             Book en tid
           </Link>

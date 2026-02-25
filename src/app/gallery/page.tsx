@@ -12,28 +12,28 @@ type GalleryImage = {
   original_name: string | null;
 };
 
-const STYLES = ["Alle", "nordisk", "ornamental", "dark-art", "blomster", "blackwork", "fineline", "unsorted"] as const;
-const STYLE_LABELS: Record<string, string> = {
-  Alle: "Alle",
-  nordisk: "Nordisk",
-  ornamental: "Ornamental",
-  "dark-art": "Dark Art",
-  blomster: "Blomster",
-  blackwork: "Blackwork",
-  fineline: "Fineline",
-  unsorted: "Andet",
+type FolderRecord = {
+  id: string;
+  label: string;
+  icon: string;
+  sort_order: number;
+  show_in_gallery: number;
 };
 
 export default function GalleryPage() {
   const [allImages, setAllImages] = useState<GalleryImage[]>([]);
+  const [folders, setFolders] = useState<FolderRecord[]>([]);
   const [activeFilter, setActiveFilter] = useState<string>("Alle");
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    fetch("/api/images/public?location=gallery")
-      .then((r) => r.json())
-      .then((data) => {
-        setAllImages(data);
+    Promise.all([
+      fetch("/api/images/public?location=gallery").then((r) => r.json()),
+      fetch("/api/folders?scope=gallery").then((r) => r.json()),
+    ])
+      .then(([images, foldersData]) => {
+        setAllImages(images);
+        setFolders(foldersData);
         setLoaded(true);
       })
       .catch(() => setLoaded(true));
@@ -43,6 +43,9 @@ export default function GalleryPage() {
     activeFilter === "Alle"
       ? allImages
       : allImages.filter((p) => p.folder === activeFilter);
+
+  const folderLabel = (id: string) =>
+    folders.find((f) => f.id === id)?.label || id;
 
   return (
     <>
@@ -55,14 +58,21 @@ export default function GalleryPage() {
 
       <div className={s.filterBar}>
         <div className={s.filterInner}>
-          {STYLES.map((style) => (
+          <button
+            type="button"
+            className={`${s.filterPill} ${activeFilter === "Alle" ? s.active : ""}`}
+            onClick={() => setActiveFilter("Alle")}
+          >
+            Alle
+          </button>
+          {folders.map((folder) => (
             <button
-              key={style}
+              key={folder.id}
               type="button"
-              className={`${s.filterPill} ${activeFilter === style ? s.active : ""}`}
-              onClick={() => setActiveFilter(style)}
+              className={`${s.filterPill} ${activeFilter === folder.id ? s.active : ""}`}
+              onClick={() => setActiveFilter(folder.id)}
             >
-              {STYLE_LABELS[style]}
+              {folder.label}
             </button>
           ))}
         </div>
@@ -90,7 +100,7 @@ export default function GalleryPage() {
                   />
                   <div className={s.galleryOverlay}>
                     <span className={s.galleryStyle}>
-                      {STYLE_LABELS[img.folder] || img.folder}
+                      {folderLabel(img.folder)}
                     </span>
                   </div>
                 </div>
@@ -100,7 +110,7 @@ export default function GalleryPage() {
 
           <p className={s.count}>
             Viser {filtered.length} tatoveringer
-            {activeFilter !== "Alle" && ` i kategorien "${STYLE_LABELS[activeFilter]}"`}
+            {activeFilter !== "Alle" && ` i kategorien "${folderLabel(activeFilter)}"`}
           </p>
         </div>
       </section>

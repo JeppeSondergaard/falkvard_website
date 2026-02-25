@@ -81,6 +81,7 @@ function migrate(db: Database.Database) {
       size          TEXT,
       description   TEXT,
       reference_urls TEXT,
+      chat_history  TEXT,
       status        TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','approved','rejected','completed')),
       source        TEXT NOT NULL DEFAULT 'web' CHECK (source IN ('web','agent')),
       created_at    TEXT NOT NULL DEFAULT (datetime('now')),
@@ -116,9 +117,58 @@ function migrate(db: Database.Database) {
       sort_order    INTEGER NOT NULL DEFAULT 0,
       created_at    TEXT NOT NULL DEFAULT (datetime('now'))
     );
+
+    CREATE TABLE IF NOT EXISTS folders (
+      id              TEXT PRIMARY KEY,
+      label           TEXT NOT NULL,
+      icon            TEXT NOT NULL DEFAULT '📁',
+      sort_order      INTEGER NOT NULL DEFAULT 0,
+      show_in_gallery INTEGER NOT NULL DEFAULT 1,
+      created_at      TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS site_content (
+      key         TEXT PRIMARY KEY,
+      value       TEXT NOT NULL,
+      type        TEXT NOT NULL DEFAULT 'text' CHECK (type IN ('text','image','json')),
+      updated_at  TEXT NOT NULL DEFAULT (datetime('now'))
+    );
   `);
 
+  try {
+    db.exec(`ALTER TABLE bookings ADD COLUMN chat_history TEXT`);
+  } catch {
+    // column already exists
+  }
+
+  seedFolders(db);
   seedImagesFromJson(db);
+}
+
+function seedFolders(db: Database.Database) {
+  const count = db.prepare("SELECT COUNT(*) as c FROM folders").get() as { c: number };
+  if (count.c > 0) return;
+
+  const defaults = [
+    { id: "frontpage", label: "Forside", icon: "★", sort_order: 0, show_in_gallery: 0 },
+    { id: "nordisk", label: "Nordisk", icon: "ᛟ", sort_order: 1, show_in_gallery: 1 },
+    { id: "ornamental", label: "Ornamental", icon: "◈", sort_order: 2, show_in_gallery: 1 },
+    { id: "dark-art", label: "Dark Art", icon: "☽", sort_order: 3, show_in_gallery: 1 },
+    { id: "blomster", label: "Blomster", icon: "✿", sort_order: 4, show_in_gallery: 1 },
+    { id: "blackwork", label: "Blackwork", icon: "■", sort_order: 5, show_in_gallery: 1 },
+    { id: "fineline", label: "Fineline", icon: "╱", sort_order: 6, show_in_gallery: 1 },
+    { id: "unsorted", label: "Usorteret", icon: "…", sort_order: 99, show_in_gallery: 1 },
+  ];
+
+  const insert = db.prepare(
+    "INSERT INTO folders (id, label, icon, sort_order, show_in_gallery) VALUES (?, ?, ?, ?, ?)"
+  );
+  const tx = db.transaction(() => {
+    for (const f of defaults) {
+      insert.run(f.id, f.label, f.icon, f.sort_order, f.show_in_gallery);
+    }
+  });
+  tx();
 }
 
 function seedImagesFromJson(db: Database.Database) {

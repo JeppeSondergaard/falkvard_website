@@ -14,7 +14,7 @@ export default function PageFadeIn() {
       setFading(true);
     };
 
-    const MAX_WAIT = 6000;
+    const MAX_WAIT = 1200;
     const timeout = setTimeout(trigger, MAX_WAIT);
 
     const images = Array.from(document.querySelectorAll("img"));
@@ -63,7 +63,7 @@ export default function PageFadeIn() {
         background: "#0a0a0e",
         pointerEvents: fading ? "none" : "all",
         opacity: fading ? 0 : 1,
-        transition: "opacity 1.2s cubic-bezier(0.4,0,0.2,1)",
+        transition: "opacity 0.6s cubic-bezier(0.4,0,0.2,1)",
       }}
       onTransitionEnd={() => ref.current?.remove()}
     />

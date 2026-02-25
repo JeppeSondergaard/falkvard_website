@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
 import { getDb, UPLOADS_DIR } from "@/lib/db";
-import { getImageById, FOLDER_IDS } from "@/lib/images";
+import { getImageById, getFolderIds } from "@/lib/images";
 import path from "path";
 import fs from "fs";
 
@@ -22,7 +22,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   const db = getDb();
 
   if (body.folder !== undefined) {
-    if (!FOLDER_IDS.includes(body.folder)) {
+    if (!getFolderIds().includes(body.folder)) {
       return NextResponse.json({ error: "Invalid folder" }, { status: 400 });
     }
     const maxOrder = db

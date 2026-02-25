@@ -6,13 +6,17 @@ import Image from "next/image";
 import AdminNav from "@/components/AdminNav";
 import {
   DndContext,
-  closestCenter,
   PointerSensor,
   useSensor,
   useSensors,
   DragEndEvent,
   DragStartEvent,
+  DragOverEvent,
   DragOverlay,
+  useDroppable,
+  pointerWithin,
+  rectIntersection,
+  CollisionDetection,
 } from "@dnd-kit/core";
 import {
   SortableContext,
@@ -35,25 +39,26 @@ type ImageRecord = {
   created_at: string;
 };
 
-const FOLDERS = [
-  { id: "frontpage", label: "Forside", icon: "★" },
-  { id: "nordisk", label: "Nordisk", icon: "ᛟ" },
-  { id: "ornamental", label: "Ornamental", icon: "◈" },
-  { id: "dark-art", label: "Dark Art", icon: "☽" },
-  { id: "blomster", label: "Blomster", icon: "✿" },
-  { id: "blackwork", label: "Blackwork", icon: "■" },
-  { id: "fineline", label: "Fineline", icon: "╱" },
-  { id: "unsorted", label: "Usorteret", icon: "…" },
-];
+type FolderRecord = {
+  id: string;
+  label: string;
+  icon: string;
+  sort_order: number;
+  show_in_gallery: number;
+};
+
+const PROTECTED_FOLDERS = ["frontpage", "unsorted"];
 
 function SortableImageCard({
   image,
+  folders,
   onToggle,
   onDelete,
   onMove,
   currentFolder,
 }: {
   image: ImageRecord;
+  folders: FolderRecord[];
   onToggle: (id: string, enabled: boolean) => void;
   onDelete: (id: string) => void;
   onMove: (id: string, folder: string) => void;
@@ -143,7 +148,7 @@ function SortableImageCard({
 
       {showMove && (
         <div className={s.moveMenu}>
-          {FOLDERS.filter((f) => f.id !== currentFolder).map((f) => (
+          {folders.filter((f) => f.id !== currentFolder).map((f) => (
             <button
               key={f.id}
               type="button"
@@ -183,10 +188,78 @@ function DragOverlayCard({ image }: { image: ImageRecord }) {
   );
 }
 
+const FOLDER_DROP_PREFIX = "folder-drop-";
+
+function DroppableFolder({
+  folder,
+  isActive,
+  count,
+  isOver,
+  onClick,
+  onDelete,
+}: {
+  folder: FolderRecord;
+  isActive: boolean;
+  count: number;
+  isOver: boolean;
+  onClick: () => void;
+  onDelete?: () => void;
+}) {
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const { setNodeRef } = useDroppable({
+    id: `${FOLDER_DROP_PREFIX}${folder.id}`,
+  });
+
+  const isProtected = PROTECTED_FOLDERS.includes(folder.id);
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={`${s.folderItem} ${isActive ? s.active : ""} ${isOver ? s.folderDropTarget : ""}`}
+    >
+      <button type="button" className={s.folderButton} onClick={onClick}>
+        <span className={s.folderIcon}>{folder.icon}</span>
+        <span className={s.folderLabel}>{folder.label}</span>
+        <span className={s.folderCount}>{count}</span>
+      </button>
+      {!isProtected && onDelete && (
+        <div className={s.folderActions}>
+          {!confirmDelete ? (
+            <button
+              type="button"
+              className={s.folderDeleteBtn}
+              onClick={(e) => {
+                e.stopPropagation();
+                setConfirmDelete(true);
+              }}
+              title="Slet mappe"
+            >
+              ✕
+            </button>
+          ) : (
+            <button
+              type="button"
+              className={s.folderConfirmDeleteBtn}
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete();
+              }}
+              onBlur={() => setTimeout(() => setConfirmDelete(false), 200)}
+            >
+              Slet?
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function AdminImagesPage() {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const [folders, setFolders] = useState<FolderRecord[]>([]);
   const [images, setImages] = useState<ImageRecord[]>([]);
   const [folderCounts, setFolderCounts] = useState<Record<string, number>>({});
   const [activeFolder, setActiveFolder] = useState("frontpage");
@@ -194,6 +267,11 @@ export default function AdminImagesPage() {
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [dragOverFolder, setDragOverFolder] = useState<string | null>(null);
+
+  const [showAddFolder, setShowAddFolder] = useState(false);
+  const [newFolderLabel, setNewFolderLabel] = useState("");
+  const [newFolderIcon, setNewFolderIcon] = useState("");
 
   const token =
     typeof window !== "undefined"
@@ -204,11 +282,28 @@ export default function AdminImagesPage() {
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
   );
 
+  const customCollisionDetection: CollisionDetection = useCallback((args) => {
+    const pointerCollisions = pointerWithin(args);
+    const folderHit = pointerCollisions.find((c) =>
+      String(c.id).startsWith(FOLDER_DROP_PREFIX)
+    );
+    if (folderHit) return [folderHit];
+    return rectIntersection(args);
+  }, []);
+
   const authHeaders = useCallback(() => {
     return {
       Authorization: `Bearer ${token}`,
     };
   }, [token]);
+
+  const fetchFolders = useCallback(async () => {
+    if (!token) return;
+    const res = await fetch("/api/folders", { headers: authHeaders() });
+    if (!res.ok) return;
+    const data: FolderRecord[] = await res.json();
+    setFolders(data);
+  }, [token, authHeaders]);
 
   const fetchImages = useCallback(async () => {
     if (!token) {
@@ -237,20 +332,24 @@ export default function AdminImagesPage() {
     if (!res.ok) return;
     const all: ImageRecord[] = await res.json();
     const counts: Record<string, number> = {};
-    for (const f of FOLDERS) counts[f.id] = 0;
+    for (const f of folders) counts[f.id] = 0;
     for (const img of all) {
       counts[img.folder] = (counts[img.folder] || 0) + 1;
     }
     setFolderCounts(counts);
-  }, [token, authHeaders]);
+  }, [token, authHeaders, folders]);
+
+  useEffect(() => {
+    fetchFolders();
+  }, [fetchFolders]);
 
   useEffect(() => {
     fetchImages();
   }, [fetchImages]);
 
   useEffect(() => {
-    fetchCounts();
-  }, [fetchCounts]);
+    if (folders.length > 0) fetchCounts();
+  }, [folders, fetchCounts]);
 
   async function toggleImage(id: string, enabled: boolean) {
     await fetch(`/api/images/${id}`, {
@@ -285,6 +384,49 @@ export default function AdminImagesPage() {
     fetchCounts();
   }
 
+  async function addFolder() {
+    if (!newFolderLabel.trim()) return;
+    const id = newFolderLabel
+      .toLowerCase()
+      .replace(/[^a-zæøå0-9]+/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "");
+
+    const res = await fetch("/api/folders", {
+      method: "POST",
+      headers: { ...authHeaders(), "Content-Type": "application/json" },
+      body: JSON.stringify({
+        id,
+        label: newFolderLabel.trim(),
+        icon: newFolderIcon.trim() || "📁",
+        show_in_gallery: true,
+      }),
+    });
+
+    if (res.ok) {
+      setNewFolderLabel("");
+      setNewFolderIcon("");
+      setShowAddFolder(false);
+      fetchFolders();
+    }
+  }
+
+  async function removeFolderById(folderId: string) {
+    const res = await fetch(`/api/folders/${folderId}`, {
+      method: "DELETE",
+      headers: authHeaders(),
+    });
+
+    if (res.ok) {
+      if (activeFolder === folderId) {
+        setActiveFolder("unsorted");
+        setLoading(true);
+      }
+      fetchFolders();
+      fetchCounts();
+    }
+  }
+
   async function uploadFiles(files: FileList | File[]) {
     if (!token) return;
     setUploading(true);
@@ -306,7 +448,7 @@ export default function AdminImagesPage() {
     fetchCounts();
   }
 
-  function handleDrop(e: React.DragEvent) {
+  function handleFileDrop(e: React.DragEvent) {
     e.preventDefault();
     setDragOver(false);
     if (e.dataTransfer.files.length > 0) {
@@ -314,12 +456,12 @@ export default function AdminImagesPage() {
     }
   }
 
-  function handleDragOver(e: React.DragEvent) {
+  function handleFileDragOver(e: React.DragEvent) {
     e.preventDefault();
     setDragOver(true);
   }
 
-  function handleDragLeave(e: React.DragEvent) {
+  function handleFileDragLeave(e: React.DragEvent) {
     e.preventDefault();
     setDragOver(false);
   }
@@ -328,10 +470,34 @@ export default function AdminImagesPage() {
     setActiveId(event.active.id as string);
   }
 
+  function handleDragOver(event: DragOverEvent) {
+    const overId = event.over?.id ? String(event.over.id) : null;
+    if (overId?.startsWith(FOLDER_DROP_PREFIX)) {
+      setDragOverFolder(overId.replace(FOLDER_DROP_PREFIX, ""));
+    } else {
+      setDragOverFolder(null);
+    }
+  }
+
   async function handleDragEnd(event: DragEndEvent) {
+    const draggedId = activeId;
     setActiveId(null);
+    setDragOverFolder(null);
+
     const { active, over } = event;
-    if (!over || active.id === over.id) return;
+    if (!over) return;
+
+    const overId = String(over.id);
+
+    if (overId.startsWith(FOLDER_DROP_PREFIX)) {
+      const targetFolder = overId.replace(FOLDER_DROP_PREFIX, "");
+      if (targetFolder !== activeFolder && draggedId) {
+        moveImage(draggedId, targetFolder);
+      }
+      return;
+    }
+
+    if (active.id === over.id) return;
 
     const oldIndex = images.findIndex((img) => img.id === active.id);
     const newIndex = images.findIndex((img) => img.id === over.id);
@@ -356,6 +522,8 @@ export default function AdminImagesPage() {
     ? images.find((img) => img.id === activeId)
     : null;
 
+  const activeFolderData = folders.find((f) => f.id === activeFolder);
+
   if (loading) {
     return (
       <>
@@ -371,95 +539,145 @@ export default function AdminImagesPage() {
     <>
       <AdminNav />
       <section className={s.section}>
-        <div className={s.layout}>
-          {/* Sidebar */}
-          <aside className={s.sidebar}>
-            <h2 className={s.sidebarTitle}>Mapper</h2>
-            <div className={s.folderList}>
-              {FOLDERS.map((folder) => (
-                <button
-                  key={folder.id}
-                  type="button"
-                  className={`${s.folderItem} ${
-                    activeFolder === folder.id ? s.active : ""
-                  }`}
-                  onClick={() => {
-                    setActiveFolder(folder.id);
-                    setLoading(true);
-                  }}
-                >
-                  <span className={s.folderIcon}>{folder.icon}</span>
-                  <span className={s.folderLabel}>{folder.label}</span>
-                  <span className={s.folderCount}>
-                    {folderCounts[folder.id] || 0}
+        <DndContext
+          sensors={sensors}
+          collisionDetection={customCollisionDetection}
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDragEnd={handleDragEnd}
+        >
+          <div className={s.layout}>
+            {/* Sidebar */}
+            <aside className={s.sidebar}>
+              <h2 className={s.sidebarTitle}>Mapper</h2>
+              <div className={s.folderList}>
+                {folders.map((folder) => (
+                  <DroppableFolder
+                    key={folder.id}
+                    folder={folder}
+                    isActive={activeFolder === folder.id}
+                    count={folderCounts[folder.id] || 0}
+                    isOver={dragOverFolder === folder.id && folder.id !== activeFolder}
+                    onClick={() => {
+                      setActiveFolder(folder.id);
+                      setLoading(true);
+                    }}
+                    onDelete={() => removeFolderById(folder.id)}
+                  />
+                ))}
+              </div>
+
+              {/* Add folder */}
+              <div className={s.addFolderSection}>
+                {!showAddFolder ? (
+                  <button
+                    type="button"
+                    className={s.addFolderToggle}
+                    onClick={() => setShowAddFolder(true)}
+                  >
+                    + Ny mappe
+                  </button>
+                ) : (
+                  <div className={s.addFolderForm}>
+                    <input
+                      type="text"
+                      className={s.addFolderInput}
+                      placeholder="Mappenavn"
+                      value={newFolderLabel}
+                      onChange={(e) => setNewFolderLabel(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && addFolder()}
+                      autoFocus
+                    />
+                    <input
+                      type="text"
+                      className={s.addFolderIconInput}
+                      placeholder="Ikon"
+                      value={newFolderIcon}
+                      onChange={(e) => setNewFolderIcon(e.target.value)}
+                      maxLength={2}
+                    />
+                    <div className={s.addFolderActions}>
+                      <button
+                        type="button"
+                        className={s.addFolderSave}
+                        onClick={addFolder}
+                        disabled={!newFolderLabel.trim()}
+                      >
+                        Opret
+                      </button>
+                      <button
+                        type="button"
+                        className={s.addFolderCancel}
+                        onClick={() => {
+                          setShowAddFolder(false);
+                          setNewFolderLabel("");
+                          setNewFolderIcon("");
+                        }}
+                      >
+                        Annuller
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </aside>
+
+            {/* Main content */}
+            <main className={s.main}>
+              <div className={s.toolbar}>
+                <div className={s.toolbarLeft}>
+                  <h1 className={s.pageTitle}>
+                    {activeFolderData?.label || activeFolder}
+                  </h1>
+                  <span className={s.imageCount}>
+                    {images.length} billede{images.length !== 1 ? "r" : ""}
                   </span>
+                </div>
+                <button
+                  type="button"
+                  className={s.uploadBtn}
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                >
+                  {uploading ? "Uploader..." : "Upload billeder"}
                 </button>
-              ))}
-            </div>
-          </aside>
-
-          {/* Main content */}
-          <main className={s.main}>
-            <div className={s.toolbar}>
-              <div className={s.toolbarLeft}>
-                <h1 className={s.pageTitle}>
-                  {FOLDERS.find((f) => f.id === activeFolder)?.label || activeFolder}
-                </h1>
-                <span className={s.imageCount}>
-                  {images.length} billede{images.length !== 1 ? "r" : ""}
-                </span>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  className={s.fileInput}
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files.length > 0) {
+                      uploadFiles(e.target.files);
+                      e.target.value = "";
+                    }
+                  }}
+                />
               </div>
-              <button
-                type="button"
-                className={s.uploadBtn}
-                onClick={() => fileInputRef.current?.click()}
-                disabled={uploading}
+
+              {/* Drop zone */}
+              <div
+                className={`${s.dropZone} ${dragOver ? s.dragOver : ""}`}
+                onDrop={handleFileDrop}
+                onDragOver={handleFileDragOver}
+                onDragLeave={handleFileDragLeave}
               >
-                {uploading ? "Uploader..." : "Upload billeder"}
-              </button>
-              <input
-                ref={fileInputRef}
-                type="file"
-                multiple
-                accept="image/jpeg,image/png,image/webp,image/gif"
-                className={s.fileInput}
-                onChange={(e) => {
-                  if (e.target.files && e.target.files.length > 0) {
-                    uploadFiles(e.target.files);
-                    e.target.value = "";
-                  }
-                }}
-              />
-            </div>
-
-            {/* Drop zone */}
-            <div
-              className={`${s.dropZone} ${dragOver ? s.dragOver : ""}`}
-              onDrop={handleDrop}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-            >
-              <div className={s.dropZoneContent}>
-                <span className={s.dropIcon}>↑</span>
-                <span>Træk billeder hertil for at uploade</span>
+                <div className={s.dropZoneContent}>
+                  <span className={s.dropIcon}>↑</span>
+                  <span>Træk billeder hertil for at uploade</span>
+                </div>
               </div>
-            </div>
 
-            {/* Image grid */}
-            {images.length === 0 ? (
-              <div className={s.empty}>
-                <p>Ingen billeder i denne mappe.</p>
-                <p className={s.emptyHint}>
-                  Upload billeder eller flyt dem fra en anden mappe.
-                </p>
-              </div>
-            ) : (
-              <DndContext
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragStart={handleDragStart}
-                onDragEnd={handleDragEnd}
-              >
+              {/* Image grid */}
+              {images.length === 0 ? (
+                <div className={s.empty}>
+                  <p>Ingen billeder i denne mappe.</p>
+                  <p className={s.emptyHint}>
+                    Upload billeder eller flyt dem fra en anden mappe.
+                  </p>
+                </div>
+              ) : (
                 <SortableContext
                   items={images.map((img) => img.id)}
                   strategy={rectSortingStrategy}
@@ -469,6 +687,7 @@ export default function AdminImagesPage() {
                       <SortableImageCard
                         key={image.id}
                         image={image}
+                        folders={folders}
                         onToggle={toggleImage}
                         onDelete={deleteImage}
                         onMove={moveImage}
@@ -477,15 +696,14 @@ export default function AdminImagesPage() {
                     ))}
                   </div>
                 </SortableContext>
-                <DragOverlay>
-                  {activeImage ? (
-                    <DragOverlayCard image={activeImage} />
-                  ) : null}
-                </DragOverlay>
-              </DndContext>
-            )}
-          </main>
-        </div>
+              )}
+            </main>
+          </div>
+
+          <DragOverlay>
+            {activeImage ? <DragOverlayCard image={activeImage} /> : null}
+          </DragOverlay>
+        </DndContext>
       </section>
     </>
   );

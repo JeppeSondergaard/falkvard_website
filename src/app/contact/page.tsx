@@ -1,17 +1,32 @@
 import Link from "next/link";
+import { getContentBulk } from "@/lib/content";
 import s from "./page.module.scss";
 
+export const dynamic = "force-dynamic";
+
 export default function ContactPage() {
+  const c = getContentBulk([
+    "contact.hero_heading",
+    "contact.hero_intro",
+    "contact.address_line1",
+    "contact.address_line2",
+    "contact.address_note",
+    "contact.instagram",
+    "contact.instagram_url",
+    "contact.instagram_note",
+    "contact.hours",
+    "contact.hours_note",
+    "contact.cta_heading",
+    "contact.cta_text",
+  ]);
+
   return (
     <>
       {/* Hero */}
       <section className={s.hero}>
         <div className={s.heroInner}>
-          <h1 className={s.heroHeading}>Kontakt</h1>
-          <p className={s.heroIntro}>
-            Har du spørgsmål eller vil du booke en tid? Du er altid velkommen
-            til at skrive.
-          </p>
+          <h1 className={s.heroHeading}>{c["contact.hero_heading"]}</h1>
+          <p className={s.heroIntro}>{c["contact.hero_intro"]}</p>
         </div>
       </section>
 
@@ -21,32 +36,28 @@ export default function ContactPage() {
           <div className={s.infoGrid}>
             <div className={s.infoCard}>
               <h3 className={s.infoTitle}>Adresse</h3>
-              <p className={s.infoText}>Ramsherred 1</p>
-              <p className={s.infoText}>5700 Svendborg</p>
-              <p className={s.infoNote}>Privat studie — kun efter aftale</p>
+              <p className={s.infoText}>{c["contact.address_line1"]}</p>
+              <p className={s.infoText}>{c["contact.address_line2"]}</p>
+              <p className={s.infoNote}>{c["contact.address_note"]}</p>
             </div>
             <div className={s.infoCard}>
               <h3 className={s.infoTitle}>Kontakt</h3>
               <p className={s.infoText}>
                 <a
-                  href="https://www.instagram.com/a_falkvard_tattoo/"
+                  href={c["contact.instagram_url"]}
                   target="_blank"
                   rel="noopener noreferrer"
                   className={s.infoLink}
                 >
-                  @a_falkvard_tattoo
+                  {c["contact.instagram"]}
                 </a>
               </p>
-              <p className={s.infoNote}>
-                Instagram er den hurtigste måde at nå mig
-              </p>
+              <p className={s.infoNote}>{c["contact.instagram_note"]}</p>
             </div>
             <div className={s.infoCard}>
               <h3 className={s.infoTitle}>Åbningstider</h3>
-              <p className={s.infoText}>Kun efter aftale</p>
-              <p className={s.infoNote}>
-                Book din tid, så finder vi et tidspunkt der passer
-              </p>
+              <p className={s.infoText}>{c["contact.hours"]}</p>
+              <p className={s.infoNote}>{c["contact.hours_note"]}</p>
             </div>
           </div>
         </div>
@@ -70,11 +81,8 @@ export default function ContactPage() {
       {/* CTA */}
       <section className={s.cta}>
         <div className={s.ctaInner}>
-          <h2 className={s.ctaHeading}>Klar til at booke?</h2>
-          <p className={s.ctaText}>
-            Udfyld vores booking-formular, så vender jeg tilbage hurtigst
-            muligt.
-          </p>
+          <h2 className={s.ctaHeading}>{c["contact.cta_heading"]}</h2>
+          <p className={s.ctaText}>{c["contact.cta_text"]}</p>
           <Link href="/booking" className={s.ctaBtn}>
             Book en tid
           </Link>

@@ -12,18 +12,57 @@ export type ImageRecord = {
   created_at: string;
 };
 
-export const FOLDERS = [
-  { id: "frontpage", label: "Forside" },
-  { id: "nordisk", label: "Nordisk" },
-  { id: "ornamental", label: "Ornamental" },
-  { id: "dark-art", label: "Dark Art" },
-  { id: "blomster", label: "Blomster" },
-  { id: "blackwork", label: "Blackwork" },
-  { id: "fineline", label: "Fineline" },
-  { id: "unsorted", label: "Usorteret" },
-] as const;
+export type FolderRecord = {
+  id: string;
+  label: string;
+  icon: string;
+  sort_order: number;
+  show_in_gallery: number;
+  created_at: string;
+};
 
-export const FOLDER_IDS = FOLDERS.map((f) => f.id);
+export function getAllFolders(): FolderRecord[] {
+  const db = getDb();
+  return db
+    .prepare("SELECT * FROM folders ORDER BY sort_order ASC, label ASC")
+    .all() as FolderRecord[];
+}
+
+export function getGalleryFolders(): FolderRecord[] {
+  const db = getDb();
+  return db
+    .prepare("SELECT * FROM folders WHERE show_in_gallery = 1 ORDER BY sort_order ASC, label ASC")
+    .all() as FolderRecord[];
+}
+
+export function getFolderIds(): string[] {
+  return getAllFolders().map((f) => f.id);
+}
+
+export function getFolderByIdFromDb(id: string): FolderRecord | undefined {
+  const db = getDb();
+  return db.prepare("SELECT * FROM folders WHERE id = ?").get(id) as FolderRecord | undefined;
+}
+
+export function createFolder(id: string, label: string, icon: string, showInGallery: boolean): FolderRecord {
+  const db = getDb();
+  const maxOrder = db
+    .prepare("SELECT MAX(sort_order) as m FROM folders")
+    .get() as { m: number | null };
+  const sortOrder = (maxOrder.m ?? -1) + 1;
+
+  db.prepare(
+    "INSERT INTO folders (id, label, icon, sort_order, show_in_gallery) VALUES (?, ?, ?, ?, ?)"
+  ).run(id, label, icon, sortOrder, showInGallery ? 1 : 0);
+
+  return getFolderByIdFromDb(id)!;
+}
+
+export function deleteFolder(id: string): void {
+  const db = getDb();
+  db.prepare("UPDATE images SET folder = 'unsorted' WHERE folder = ?").run(id);
+  db.prepare("DELETE FROM folders WHERE id = ?").run(id);
+}
 
 export function getAllImages(folder?: string): ImageRecord[] {
   const db = getDb();
@@ -52,7 +91,7 @@ export function getEnabledImages(folder?: string): ImageRecord[] {
 export function getGalleryImages(): ImageRecord[] {
   const db = getDb();
   return db
-    .prepare("SELECT * FROM images WHERE enabled = 1 AND folder != 'frontpage' ORDER BY sort_order ASC, created_at DESC")
+    .prepare("SELECT * FROM images WHERE enabled = 1 AND folder NOT IN ('frontpage','unsorted') ORDER BY sort_order ASC, created_at DESC")
     .all() as ImageRecord[];
 }
 
@@ -74,8 +113,9 @@ export function getFolderCounts(): Record<string, number> {
     .prepare("SELECT folder, COUNT(*) as count FROM images GROUP BY folder")
     .all() as Array<{ folder: string; count: number }>;
 
+  const folders = getAllFolders();
   const counts: Record<string, number> = {};
-  for (const f of FOLDERS) counts[f.id] = 0;
+  for (const f of folders) counts[f.id] = 0;
   for (const row of rows) counts[row.folder] = row.count;
   return counts;
 }

@@ -1,7 +1,12 @@
 import Link from "next/link";
+import { getContentBulk } from "@/lib/content";
 import s from "./page.module.scss";
 
-const TATTOO_STEPS = [
+export const dynamic = "force-dynamic";
+
+type StepItem = { title: string; text: string };
+
+const DEFAULT_TATTOO_STEPS: StepItem[] = [
   {
     title: "Dag 1-3",
     text: "Hold forbindingen på i 2-4 timer. Vask forsigtigt med lunkent vand og parfumefri sæbe. Dup tør med rent papir – gnid ikke.",
@@ -20,7 +25,7 @@ const TATTOO_STEPS = [
   },
 ];
 
-const PIERCING_STEPS = [
+const DEFAULT_PIERCING_STEPS: StepItem[] = [
   {
     title: "De første uger",
     text: "Rens med saltvand (0.9%) morgen og aften. Undgå at røre piercingen med beskidte hænder. Lad smykket sidde – drej det ikke.",
@@ -35,7 +40,7 @@ const PIERCING_STEPS = [
   },
 ];
 
-const DONTS = [
+const DEFAULT_DONTS: string[] = [
   "Svømmehaller, badekar og sauna",
   "Direkte sollys og solarier",
   "Stram, gnidende tøj over tatoveringen",
@@ -45,25 +50,73 @@ const DONTS = [
 ];
 
 export default function AftercarePage() {
+  const c = getContentBulk([
+    "aftercare.hero_heading",
+    "aftercare.hero_intro",
+    "aftercare.tattoo_heading",
+    "aftercare.tattoo_steps",
+    "aftercare.donts_heading",
+    "aftercare.donts_items",
+    "aftercare.piercing_heading",
+    "aftercare.piercing_steps",
+    "aftercare.cta_heading",
+    "aftercare.cta_text",
+    "aftercare.cta_button_label",
+  ]);
+
+  function parseSteps(raw: string, fallback: StepItem[]): StepItem[] {
+    try {
+      const parsed = JSON.parse(raw);
+      if (
+        Array.isArray(parsed) &&
+        parsed.every(
+          (item) =>
+            item &&
+            typeof item === "object" &&
+            typeof (item as { title?: unknown }).title === "string" &&
+            typeof (item as { text?: unknown }).text === "string"
+        )
+      ) {
+        return parsed as StepItem[];
+      }
+    } catch {
+      // Fallback when JSON content is invalid or malformed
+    }
+    return fallback;
+  }
+
+  function parseStringList(raw: string, fallback: string[]): string[] {
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.every((item) => typeof item === "string")) {
+        return parsed;
+      }
+    } catch {
+      // Fallback when JSON content is invalid or malformed
+    }
+    return fallback;
+  }
+
+  const tattooSteps = parseSteps(c["aftercare.tattoo_steps"], DEFAULT_TATTOO_STEPS);
+  const piercingSteps = parseSteps(c["aftercare.piercing_steps"], DEFAULT_PIERCING_STEPS);
+  const donts = parseStringList(c["aftercare.donts_items"], DEFAULT_DONTS);
+
   return (
     <>
       {/* Hero */}
       <section className={s.hero}>
         <div className={s.heroInner}>
-          <h1 className={s.heroHeading}>Efterpleje</h1>
-          <p className={s.heroIntro}>
-            God efterpleje er afgørende for et flot resultat. Her er din guide
-            til at passe på din nye tatovering eller piercing.
-          </p>
+          <h1 className={s.heroHeading}>{c["aftercare.hero_heading"]}</h1>
+          <p className={s.heroIntro}>{c["aftercare.hero_intro"]}</p>
         </div>
       </section>
 
       {/* Tattoo Aftercare */}
       <section className={s.section}>
         <div className={s.sectionInner}>
-          <h2 className={s.sectionTitle}>Tatovering efterpleje</h2>
+          <h2 className={s.sectionTitle}>{c["aftercare.tattoo_heading"]}</h2>
           <div className={s.stepsGrid}>
-            {TATTOO_STEPS.map((step) => (
+            {tattooSteps.map((step) => (
               <div key={step.title} className={s.stepCard}>
                 <h3 className={s.stepTitle}>{step.title}</h3>
                 <p className={s.stepText}>{step.text}</p>
@@ -76,9 +129,9 @@ export default function AftercarePage() {
       {/* Don'ts */}
       <section className={s.sectionAlt}>
         <div className={s.sectionInner}>
-          <h2 className={s.sectionTitle}>Undgå de første 2-4 uger</h2>
+          <h2 className={s.sectionTitle}>{c["aftercare.donts_heading"]}</h2>
           <div className={s.dontGrid}>
-            {DONTS.map((item) => (
+            {donts.map((item) => (
               <div key={item} className={s.dontItem}>
                 <span className={s.dontX}>&times;</span>
                 <span className={s.dontText}>{item}</span>
@@ -91,9 +144,9 @@ export default function AftercarePage() {
       {/* Piercing Aftercare */}
       <section className={s.section}>
         <div className={s.sectionInner}>
-          <h2 className={s.sectionTitle}>Piercing efterpleje</h2>
+          <h2 className={s.sectionTitle}>{c["aftercare.piercing_heading"]}</h2>
           <div className={s.stepsGrid}>
-            {PIERCING_STEPS.map((step) => (
+            {piercingSteps.map((step) => (
               <div key={step.title} className={s.stepCard}>
                 <h3 className={s.stepTitle}>{step.title}</h3>
                 <p className={s.stepText}>{step.text}</p>
@@ -106,12 +159,10 @@ export default function AftercarePage() {
       {/* CTA */}
       <section className={s.cta}>
         <div className={s.ctaInner}>
-          <h2 className={s.ctaHeading}>Har du spørgsmål?</h2>
-          <p className={s.ctaText}>
-            Er du i tvivl om noget, er du altid velkommen til at kontakte mig.
-          </p>
+          <h2 className={s.ctaHeading}>{c["aftercare.cta_heading"]}</h2>
+          <p className={s.ctaText}>{c["aftercare.cta_text"]}</p>
           <Link href="/contact" className={s.ctaBtn}>
-            Kontakt mig
+            {c["aftercare.cta_button_label"]}
           </Link>
         </div>
       </section>

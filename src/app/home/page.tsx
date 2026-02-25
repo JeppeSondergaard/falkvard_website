@@ -4,7 +4,10 @@ import TentIcon from "@/components/TentIcon";
 import HeroVideo from "@/components/HeroVideo";
 import PageFadeIn from "@/components/PageFadeIn";
 import { getFrontpageImages, getGalleryImages } from "@/lib/images";
+import { getContentBulk } from "@/lib/content";
 import s from "./page.module.scss";
+
+export const dynamic = "force-dynamic";
 
 export default function Home() {
   const frontpageImages = getFrontpageImages();
@@ -12,6 +15,35 @@ export default function Home() {
     frontpageImages.length > 0
       ? frontpageImages.slice(0, 6)
       : getGalleryImages().slice(0, 6);
+
+  const c = getContentBulk([
+    "home.hero_label",
+    "home.hero_title",
+    "home.hero_sub",
+    "home.intro_label",
+    "home.intro_heading",
+    "home.intro_text",
+    "home.services_heading",
+    "home.service_1_title",
+    "home.service_1_text",
+    "home.service_2_title",
+    "home.service_2_text",
+    "home.service_3_title",
+    "home.service_3_text",
+    "home.quote_text",
+    "home.quote_author",
+    "home.process_heading",
+    "home.process_steps",
+    "home.cta_heading",
+    "home.cta_text",
+  ]);
+
+  let processSteps: { title: string; text: string }[] = [];
+  try {
+    processSteps = JSON.parse(c["home.process_steps"]);
+  } catch { /* use empty */ }
+
+  const heroTitleParts = c["home.hero_title"].split("\n");
 
   return (
     <>
@@ -27,16 +59,16 @@ export default function Home() {
           <TentIcon size={400} variant="white" />
         </div>
         <div className={s.heroContent}>
-          <p className={s.heroLabel}>Privat studie i Svendborg</p>
+          <p className={s.heroLabel}>{c["home.hero_label"]}</p>
           <h1 className={s.heroTitle}>
-            Tatoveringer
-            <br />
-            med sjæl
+            {heroTitleParts.map((part, i) => (
+              <span key={i}>
+                {i > 0 && <br />}
+                {part}
+              </span>
+            ))}
           </h1>
-          <p className={s.heroSub}>
-            Nordisk, Ornamental, Dark Art & blomster — skabt i trygge rammer,
-            kun for dig.
-          </p>
+          <p className={s.heroSub}>{c["home.hero_sub"]}</p>
           <div className={s.heroCtas}>
             <Link href="/booking" className={s.heroBtn}>
               Book en tid
@@ -55,15 +87,9 @@ export default function Home() {
       {/* Intro */}
       <section className={s.intro}>
         <div className={s.introInner}>
-          <p className={s.sectionLabel}>Historien</p>
-          <h2 className={s.introHeading}>
-            Et privat studie hvor kunden altid er i centrum
-          </h2>
-          <p className={s.introText}>
-            Det vigtigste for mig er, at du føler dig tryg, hørt og set gennem
-            hele processen. Jeg er her for at hjælpe dig med at finde det rette
-            design, der passer til dig og din historie.
-          </p>
+          <p className={s.sectionLabel}>{c["home.intro_label"]}</p>
+          <h2 className={s.introHeading}>{c["home.intro_heading"]}</h2>
+          <p className={s.introText}>{c["home.intro_text"]}</p>
           <Link href="/about" className={s.ghostLink}>
             Læs hele historien
           </Link>
@@ -99,31 +125,22 @@ export default function Home() {
       <section className={s.services}>
         <div className={s.servicesInner}>
           <p className={s.sectionLabel}>Services</p>
-          <h2 className={s.servicesHeading}>Hvad vi tilbyder</h2>
+          <h2 className={s.servicesHeading}>{c["home.services_heading"]}</h2>
           <div className={s.servicesGrid}>
             <div className={s.serviceCard}>
               <span className={s.serviceNumber}>01</span>
-              <h3 className={s.serviceTitle}>Tatovering</h3>
-              <p className={s.serviceText}>
-                Custom designs i nordisk, ornamental, dark art og blomster
-                stilarter. Altid unikke, altid personlige.
-              </p>
+              <h3 className={s.serviceTitle}>{c["home.service_1_title"]}</h3>
+              <p className={s.serviceText}>{c["home.service_1_text"]}</p>
             </div>
             <div className={s.serviceCardAccent}>
               <span className={s.serviceNumber}>02</span>
-              <h3 className={s.serviceTitle}>Piercing</h3>
-              <p className={s.serviceText}>
-                Professionel piercing med kvalitetssmykker i et trygt og sterilt
-                miljø.
-              </p>
+              <h3 className={s.serviceTitle}>{c["home.service_2_title"]}</h3>
+              <p className={s.serviceText}>{c["home.service_2_text"]}</p>
             </div>
             <div className={s.serviceCard}>
               <span className={s.serviceNumber}>03</span>
-              <h3 className={s.serviceTitle}>Konsultation</h3>
-              <p className={s.serviceText}>
-                Gratis forhåndssamtale hvor vi sammen finder det perfekte design
-                og placering.
-              </p>
+              <h3 className={s.serviceTitle}>{c["home.service_3_title"]}</h3>
+              <p className={s.serviceText}>{c["home.service_3_text"]}</p>
             </div>
           </div>
           <Link href="/services" className={s.ghostLink}>
@@ -137,10 +154,9 @@ export default function Home() {
         <div className={s.quoteInner}>
           <TentIcon size={36} variant="white" />
           <blockquote className={s.quoteText}>
-            &ldquo;Det vigtigste for mig er, at du føler dig tryg, hørt og set
-            gennem hele processen.&rdquo;
+            &ldquo;{c["home.quote_text"]}&rdquo;
           </blockquote>
-          <p className={s.quoteAuthor}>— A Falkvard Tattoo</p>
+          <p className={s.quoteAuthor}>{c["home.quote_author"]}</p>
         </div>
       </section>
 
@@ -148,36 +164,15 @@ export default function Home() {
       <section className={s.process}>
         <div className={s.processInner}>
           <p className={s.sectionLabel}>Processen</p>
-          <h2 className={s.processHeading}>Sådan booker du</h2>
+          <h2 className={s.processHeading}>{c["home.process_heading"]}</h2>
           <div className={s.stepsGrid}>
-            <div className={s.step}>
-              <span className={s.stepNum}>01</span>
-              <h4 className={s.stepTitle}>Find din inspiration</h4>
-              <p className={s.stepText}>
-                Kig vores galleri igennem, eller fortæl os om din idé.
-              </p>
-            </div>
-            <div className={s.step}>
-              <span className={s.stepNum}>02</span>
-              <h4 className={s.stepTitle}>Send en forespørgsel</h4>
-              <p className={s.stepText}>
-                Brug bookingformularen eller skriv direkte til os.
-              </p>
-            </div>
-            <div className={s.step}>
-              <span className={s.stepNum}>03</span>
-              <h4 className={s.stepTitle}>Vi designer sammen</h4>
-              <p className={s.stepText}>
-                Vi skaber et unikt design, der passer præcist til dig.
-              </p>
-            </div>
-            <div className={s.step}>
-              <span className={s.stepNum}>04</span>
-              <h4 className={s.stepTitle}>Bliv tatoveret</h4>
-              <p className={s.stepText}>
-                I trygge rammer i vores private studie. Kun dig og tatovøren.
-              </p>
-            </div>
+            {processSteps.map((step, i) => (
+              <div key={i} className={s.step}>
+                <span className={s.stepNum}>{String(i + 1).padStart(2, "0")}</span>
+                <h4 className={s.stepTitle}>{step.title}</h4>
+                <p className={s.stepText}>{step.text}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -185,11 +180,8 @@ export default function Home() {
       {/* CTA */}
       <section className={s.cta}>
         <div className={s.ctaInner}>
-          <h2 className={s.ctaHeading}>Klar til din næste tatovering?</h2>
-          <p className={s.ctaText}>
-            Book en gratis konsultation og lad os finde dit perfekte design
-            sammen.
-          </p>
+          <h2 className={s.ctaHeading}>{c["home.cta_heading"]}</h2>
+          <p className={s.ctaText}>{c["home.cta_text"]}</p>
           <Link href="/booking" className={s.ctaBtn}>
             Book en tid
           </Link>
