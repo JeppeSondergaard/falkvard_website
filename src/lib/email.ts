@@ -16,6 +16,7 @@ function getTransport() {
     host: SMTP_HOST,
     port: SMTP_PORT,
     secure: SMTP_PORT === 465,
+    requireTLS: SMTP_PORT !== 465,
     auth: { user: SMTP_USER, pass: SMTP_PASS },
   });
 }

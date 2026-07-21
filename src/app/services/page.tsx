@@ -9,22 +9,18 @@ const STYLES = [
   {
     name: "Nordisk",
     desc: "Vikingeinspirerede mønstre, runer og keltiske knuder",
-    image: "/styles/style-nordisk.jpg",
   },
   {
     name: "Ornamental",
     desc: "Geometriske og symmetriske designs med fine detaljer",
-    image: "/styles/style-ornamental.jpg",
   },
   {
     name: "Dark Art",
     desc: "Mørke, atmosfæriske motiver med dybde og stemning",
-    image: "/styles/style-darkart.jpg",
   },
   {
     name: "Blomster",
     desc: "Botaniske designs fra fine linjer til bold realism",
-    image: "/styles/style-blomster.jpg",
   },
 ];
 
@@ -55,6 +51,10 @@ export default function ServicesPage() {
   const c = getContentBulk([
     "services.hero_title",
     "services.hero_sub",
+    "services.style_nordisk_image",
+    "services.style_ornamental_image",
+    "services.style_darkart_image",
+    "services.style_blomster_image",
     "services.piercing_text",
     "services.price_consultation",
     "services.price_minimum",
@@ -64,6 +64,13 @@ export default function ServicesPage() {
     "services.cta_heading",
     "services.cta_text",
   ]);
+
+  const stylesWithImages = [
+    { ...STYLES[0], image: c["services.style_nordisk_image"] },
+    { ...STYLES[1], image: c["services.style_ornamental_image"] },
+    { ...STYLES[2], image: c["services.style_darkart_image"] },
+    { ...STYLES[3], image: c["services.style_blomster_image"] },
+  ];
 
   return (
     <>
@@ -82,7 +89,7 @@ export default function ServicesPage() {
           <p className={s.sectionLabel}>Tatovering</p>
           <h2 className={s.sectionTitle}>Stilarter</h2>
           <div className={s.stylesGrid}>
-            {STYLES.map((style) => (
+            {stylesWithImages.map((style) => (
               <div key={style.name} className={s.styleCard}>
                 <div className={s.styleCardImageWrap}>
                   <Image

@@ -8,7 +8,7 @@ import s from "./content.module.scss";
 
 type ContentDefaults = Record<
   string,
-  { value: string; type: "text" | "image" | "json"; label: string; page: string; section: string }
+  { value: string; type: "text" | "image" | "media" | "json"; label: string; page: string; section: string }
 >;
 
 const PAGES = ["Om", "Forside", "Services", "Aftercare", "Kontakt", "Booking"];
@@ -24,6 +24,8 @@ export default function ContentPage() {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadingKey, setUploadingKey] = useState<string | null>(null);
+  const [uploadInputAccept, setUploadInputAccept] = useState("image/jpeg,image/png,image/webp,image/gif");
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const token =
     typeof window !== "undefined"
@@ -72,7 +74,7 @@ export default function ContentPage() {
     setSaving(true);
     const textEntries: Record<string, string> = {};
     for (const [key, value] of Object.entries(dirty)) {
-      if (defaults[key]?.type !== "image") {
+      if (!["image", "media"].includes(defaults[key]?.type ?? "")) {
         textEntries[key] = value;
       }
     }
@@ -95,20 +97,31 @@ export default function ContentPage() {
     setTimeout(() => setSaved(false), 3000);
   }
 
-  async function handleImageUpload(key: string, file: File) {
+  async function handleFileUpload(key: string, file: File) {
     if (!token) return;
     setUploadingKey(key);
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("key", key);
+    setUploadError(null);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("key", key);
 
-    const res = await fetch("/api/site-content", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${token}` },
-      body: formData,
-    });
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 180_000);
+      const res = await fetch("/api/site-content", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+        signal: controller.signal,
+      });
+      clearTimeout(timeout);
 
-    if (res.ok) {
+      if (!res.ok) {
+        const payload = await res.json().catch(() => null) as { error?: string } | null;
+        setUploadError(payload?.error || "Upload fejlede. Prøv igen.");
+        return;
+      }
+
       const data = await res.json();
       setContent((prev) => ({ ...prev, [key]: data.src }));
       setDirty((prev) => {
@@ -116,8 +129,15 @@ export default function ContentPage() {
         delete next[key];
         return next;
       });
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") {
+        setUploadError("Upload tog for lang tid og blev afbrudt. Prøv en mindre video.");
+      } else {
+        setUploadError("Upload fejlede. Tjek netværk og prøv igen.");
+      }
+    } finally {
+      setUploadingKey(null);
     }
-    setUploadingKey(null);
   }
 
   function getPageSections(): Record<string, string[]> {
@@ -134,8 +154,14 @@ export default function ContentPage() {
     const def = defaults[key];
     if (!def) return null;
 
-    if (def.type === "image") {
+    if (def.type === "image" || def.type === "media") {
       const currentSrc = getValue(key);
+      const normalizedSrc = currentSrc.split("?")[0].toLowerCase();
+      const isVideo =
+        def.type === "media" &&
+        [".mp4", ".webm", ".mov", ".m4v", ".ogv"].some((ext) =>
+          normalizedSrc.endsWith(ext)
+        );
       return (
         <div key={key} className={s.fieldCard}>
           <span className={s.fieldLabel}>
@@ -144,11 +170,15 @@ export default function ContentPage() {
           </span>
           <div className={s.imageField}>
             <div className={s.imagePreview}>
-              {currentSrc ? (
+              {currentSrc ? isVideo ? (
+                <video src={currentSrc} muted controls playsInline />
+              ) : (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={currentSrc} alt={def.label} />
               ) : (
-                <span className={s.imagePlaceholder}>Intet billede</span>
+                <span className={s.imagePlaceholder}>
+                  {def.type === "media" ? "Ingen media valgt" : "Intet billede"}
+                </span>
               )}
             </div>
             <div className={s.imageControls}>
@@ -157,14 +187,21 @@ export default function ContentPage() {
                 className={s.uploadBtn}
                 onClick={() => {
                   setUploadingKey(key);
+                  setUploadInputAccept(
+                    def.type === "media"
+                      ? "image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime,video/ogg"
+                      : "image/jpeg,image/png,image/webp,image/gif"
+                  );
                   fileInputRef.current?.click();
                 }}
                 disabled={uploadingKey === key}
               >
-                {uploadingKey === key ? "Uploader..." : "Vælg nyt billede"}
+                {uploadingKey === key ? "Uploader..." : def.type === "media" ? "Vælg video/billede" : "Vælg nyt billede"}
               </button>
               <span className={s.uploadHint}>
-                JPG, PNG eller WebP. Maks 10 MB.
+                {def.type === "media"
+                  ? "JPG, PNG, WebP, GIF, MP4, WebM, MOV eller OGV. Maks 50 MB."
+                  : "JPG, PNG, WebP eller GIF. Maks 50 MB."}
               </span>
             </div>
           </div>
@@ -417,12 +454,12 @@ export default function ContentPage() {
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/jpeg,image/png,image/webp,image/gif"
+        accept={uploadInputAccept}
         className={s.hiddenInput}
         onChange={(e) => {
           const file = e.target.files?.[0];
           if (file && uploadingKey) {
-            handleImageUpload(uploadingKey, file);
+            handleFileUpload(uploadingKey, file);
           }
           e.target.value = "";
         }}
@@ -432,6 +469,7 @@ export default function ContentPage() {
           <div className={s.header}>
             <h1 className={s.title}>Indhold</h1>
             <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+              {uploadError && <span className={s.uploadError}>{uploadError}</span>}
               {saved && <span className={s.saveFeedback}>Gemt!</span>}
               <button
                 type="button"

@@ -1,53 +1,46 @@
-"use client";
-
-import { useRef, useEffect, useState } from "react";
-
 interface HeroVideoProps {
   className?: string;
+  src?: string;
+  posterSrc?: string;
 }
 
-export default function HeroVideo({ className }: HeroVideoProps) {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [videoOk, setVideoOk] = useState(false);
+const DEFAULT_VIDEO_SRC = "/hero-bg-720.mp4";
+const DEFAULT_POSTER_SRC = "/hero-bg-poster.jpg";
+const VIDEO_EXTENSIONS = [".mp4", ".webm", ".mov", ".m4v", ".ogv"];
 
-  useEffect(() => {
-    let cancelled = false;
-    fetch("/hero-bg-720.mp4", { method: "HEAD" })
-      .then((res) => {
-        if (!cancelled && res.ok) setVideoOk(true);
-      })
-      .catch(() => {});
-    return () => { cancelled = true; };
-  }, []);
+function isVideoFile(src: string): boolean {
+  const normalizedSrc = src.split("?")[0].toLowerCase();
+  return VIDEO_EXTENSIONS.some((ext) => normalizedSrc.endsWith(ext));
+}
 
-  useEffect(() => {
-    if (!videoOk) return;
-    const video = videoRef.current;
-    if (!video) return;
-    video.play().catch(() => {});
-  }, [videoOk]);
+export default function HeroVideo({
+  className,
+  src = DEFAULT_VIDEO_SRC,
+  posterSrc = DEFAULT_POSTER_SRC,
+}: HeroVideoProps) {
+  const mediaSrc = src || DEFAULT_VIDEO_SRC;
+  const isVideo = isVideoFile(mediaSrc);
 
-  if (!videoOk) {
+  if (!isVideo) {
     return (
       <div
         className={className}
-        style={{ backgroundImage: "url(/hero-bg-poster.jpg)", backgroundSize: "cover", backgroundPosition: "center" }}
+        style={{ backgroundImage: `url(${mediaSrc})`, backgroundSize: "cover", backgroundPosition: "center" }}
       />
     );
   }
 
   return (
     <video
-      ref={videoRef}
       className={className}
       autoPlay
       muted
       loop
       playsInline
-      poster="/hero-bg-poster.jpg"
+      poster={posterSrc}
       preload="auto"
     >
-      <source src="/hero-bg-720.mp4" type="video/mp4" />
+      <source src={mediaSrc} />
     </video>
   );
 }

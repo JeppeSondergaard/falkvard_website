@@ -54,6 +54,7 @@ export default function AftercarePage() {
     "aftercare.hero_heading",
     "aftercare.hero_intro",
     "aftercare.tattoo_heading",
+    "aftercare.tattoo_intro",
     "aftercare.tattoo_steps",
     "aftercare.donts_heading",
     "aftercare.donts_items",
@@ -115,6 +116,7 @@ export default function AftercarePage() {
       <section className={s.section}>
         <div className={s.sectionInner}>
           <h2 className={s.sectionTitle}>{c["aftercare.tattoo_heading"]}</h2>
+          <p className={s.sectionIntro}>{c["aftercare.tattoo_intro"]}</p>
           <div className={s.stepsGrid}>
             {tattooSteps.map((step) => (
               <div key={step.title} className={s.stepCard}>

@@ -49,6 +49,14 @@ export default function Footer() {
           >
             Instagram
           </a>
+          <a
+            href="https://www.facebook.com/afalkvardtattoo/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={s.socialLink}
+          >
+            Facebook
+          </a>
         </div>
       </div>
 

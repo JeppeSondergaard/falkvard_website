@@ -56,6 +56,12 @@
   color: #0c6;
 }
 
+.uploadError {
+  @include body;
+  font-size: $type-sm;
+  color: #e55;
+}
+
 .loading {
   @include body;
   text-align: center;
@@ -201,6 +207,13 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+  }
+
+  video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background: #000;
   }
 }
 

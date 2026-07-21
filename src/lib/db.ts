@@ -141,8 +141,37 @@ function migrate(db: Database.Database) {
     // column already exists
   }
 
+  migrateSiteContentTypeConstraint(db);
   seedFolders(db);
   seedImagesFromJson(db);
+}
+
+function migrateSiteContentTypeConstraint(db: Database.Database) {
+  const row = db
+    .prepare("SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'site_content'")
+    .get() as { sql?: string } | undefined;
+
+  const schemaSql = row?.sql ?? "";
+  if (schemaSql.includes("'media'")) return;
+
+  const tx = db.transaction(() => {
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS site_content_new (
+        key         TEXT PRIMARY KEY,
+        value       TEXT NOT NULL,
+        type        TEXT NOT NULL DEFAULT 'text' CHECK (type IN ('text','image','media','json')),
+        updated_at  TEXT NOT NULL DEFAULT (datetime('now'))
+      );
+    `);
+    db.exec(`
+      INSERT INTO site_content_new (key, value, type, updated_at)
+      SELECT key, value, type, updated_at FROM site_content;
+    `);
+    db.exec(`DROP TABLE site_content;`);
+    db.exec(`ALTER TABLE site_content_new RENAME TO site_content;`);
+  });
+
+  tx();
 }
 
 function seedFolders(db: Database.Database) {

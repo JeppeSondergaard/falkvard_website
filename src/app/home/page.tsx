@@ -20,6 +20,7 @@ export default function Home() {
     "home.hero_label",
     "home.hero_title",
     "home.hero_sub",
+    "home.hero_background",
     "home.intro_label",
     "home.intro_heading",
     "home.intro_text",
@@ -50,11 +51,8 @@ export default function Home() {
       <PageFadeIn />
       {/* Hero */}
       <section className={s.hero}>
-        <HeroVideo className={s.heroVideo} />
+        <HeroVideo className={s.heroVideo} src={c["home.hero_background"]} />
         <div className={s.heroOverlay} />
-        <Link href="/" className={s.worldBtn}>
-          <span style={{ fontSize: '1.2em' }}>←</span> Tilbage til intro
-        </Link>
         <div className={s.heroWatermark}>
           <TentIcon size={400} variant="white" />
         </div>

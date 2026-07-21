@@ -10,6 +10,10 @@ const MIME_TYPES: Record<string, string> = {
   webp: "image/webp",
   gif: "image/gif",
   svg: "image/svg+xml",
+  mp4: "video/mp4",
+  webm: "video/webm",
+  mov: "video/quicktime",
+  ogv: "video/ogg",
 };
 
 type Params = { params: Promise<{ path: string[] }> };

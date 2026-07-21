@@ -1,4 +1,4 @@
-export type ContentType = "text" | "image" | "json";
+export type ContentType = "text" | "image" | "media" | "json";
 
 export interface ContentEntry {
   key: string;
@@ -28,6 +28,7 @@ export const CONTENT_DEFAULTS: Record<string, { value: string; type: ContentType
   "home.hero_label": { value: "Privat studie i Svendborg", type: "text", label: "Label", page: "Forside", section: "Hero" },
   "home.hero_title": { value: "Tatoveringer\nmed sjæl", type: "text", label: "Titel", page: "Forside", section: "Hero" },
   "home.hero_sub": { value: "Nordisk, Ornamental, Dark Art & blomster — skabt i trygge rammer, kun for dig.", type: "text", label: "Undertekst", page: "Forside", section: "Hero" },
+  "home.hero_background": { value: "/hero-bg-720.mp4", type: "media", label: "Baggrund (video eller billede)", page: "Forside", section: "Hero" },
   "home.intro_label": { value: "Historien", type: "text", label: "Label", page: "Forside", section: "Intro" },
   "home.intro_heading": { value: "Et privat studie hvor kunden altid er i centrum", type: "text", label: "Overskrift", page: "Forside", section: "Intro" },
   "home.intro_text": { value: "Det vigtigste for mig er, at du føler dig tryg, hørt og set gennem hele processen. Jeg er her for at hjælpe dig med at finde det rette design, der passer til dig og din historie.", type: "text", label: "Tekst", page: "Forside", section: "Intro" },
@@ -53,6 +54,10 @@ export const CONTENT_DEFAULTS: Record<string, { value: string; type: ContentType
   // ---- Services page ----
   "services.hero_title": { value: "Alt hvad vi tilbyder", type: "text", label: "Titel", page: "Services", section: "Hero" },
   "services.hero_sub": { value: "I vores private studie i Svendborg", type: "text", label: "Undertekst", page: "Services", section: "Hero" },
+  "services.style_nordisk_image": { value: "/styles/style-nordisk.jpg", type: "image", label: "Nordisk stil billede", page: "Services", section: "Stilarter" },
+  "services.style_ornamental_image": { value: "/styles/style-ornamental.jpg", type: "image", label: "Ornamental stil billede", page: "Services", section: "Stilarter" },
+  "services.style_darkart_image": { value: "/styles/style-darkart.jpg", type: "image", label: "Dark Art stil billede", page: "Services", section: "Stilarter" },
+  "services.style_blomster_image": { value: "/styles/style-blomster.jpg", type: "image", label: "Blomster stil billede", page: "Services", section: "Stilarter" },
   "services.piercing_text": { value: "Vi udfører professionel piercing med kvalitetssmykker i et trygt og sterilt miljø. Alle piercinger inkluderer et startsmykke i titanium og en grundig vejledning i efterpleje.", type: "text", label: "Piercing tekst", page: "Services", section: "Piercing" },
   "services.price_note": { value: "Inkl. smykke. Endelig pris aftales altid på forhånd.", type: "text", label: "Prisnote", page: "Services", section: "Priser" },
   "services.price_consultation": { value: "Gratis", type: "text", label: "Konsultation pris", page: "Services", section: "Priser" },
@@ -66,6 +71,7 @@ export const CONTENT_DEFAULTS: Record<string, { value: string; type: ContentType
   "aftercare.hero_heading": { value: "Efterpleje", type: "text", label: "Overskrift", page: "Aftercare", section: "Hero" },
   "aftercare.hero_intro": { value: "God efterpleje er afgørende for et flot resultat. Her er din guide til at passe på din nye tatovering eller piercing.", type: "text", label: "Intro", page: "Aftercare", section: "Hero" },
   "aftercare.tattoo_heading": { value: "Tatovering efterpleje", type: "text", label: "Sektion overskrift", page: "Aftercare", section: "Tattoo" },
+  "aftercare.tattoo_intro": { value: "Følg disse råd de første uger for at give din tatovering de bedste betingelser for at hele flot og jævnt.", type: "text", label: "Sektion intro", page: "Aftercare", section: "Tattoo" },
   "aftercare.tattoo_steps": { value: JSON.stringify([
     { title: "Dag 1-3", text: "Hold forbindingen på i 2-4 timer. Vask forsigtigt med lunkent vand og parfumefri sæbe. Dup tør med rent papir - gnid ikke." },
     { title: "Uge 1-2", text: "Smør tynt lag af efterplejeproduktet 2-3 gange dagligt. Undgå at kradse eller pille i skorperne. Hold tatoveringen ren og tør." },

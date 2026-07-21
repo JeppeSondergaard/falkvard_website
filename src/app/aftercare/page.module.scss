@@ -47,6 +47,15 @@
   margin-bottom: $space-6;
 }
 
+.sectionIntro {
+  @include body;
+  font-size: $type-md;
+  color: var(--text-secondary);
+  margin-top: -$space-3;
+  margin-bottom: $space-6;
+  max-width: 72ch;
+}
+
 // ===== STEPS =====
 .stepsGrid {
   display: grid;
